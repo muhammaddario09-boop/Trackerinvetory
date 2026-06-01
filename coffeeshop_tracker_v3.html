@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>☕ CoffeeOps v3 — Sistem Operasional</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--espresso:#1a0a00;--roast:#3E1C00;--mahogany:#6F3D0F;--caramel:#C8956C;--latte:#D4A853;--cream:#FDF6EC;--milk:#FAF0E6;--foam:#FFFFFF;--sage:#2E7D32;--matcha:#4CAF50;--mint:#C8E6C9;--red:#C62828;--red-lt:#FFCDD2;--amber:#E65100;--amber-lt:#FFE0B2;--steel:#1565C0;--sky:#BBDEFB;--purple:#6A1B9A;--lavender:#E1BEE7;--teal:#00695C;--teal-lt:#B2DFDB;--grey:#424242;--grey-lt:#EEEEEE;--shadow:rgba(62,28,0,0.12);--card-radius:16px;--transition:0.25s cubic-bezier(0.4,0,0.2,1);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--espresso);color:var(--cream);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(212,168,83,0.08) 0%,transparent 60%),radial-gradient(ellipse 60% 80% at 80% 90%,rgba(200,149,108,0.06) 0%,transparent 60%),url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C8956C' fill-opacity='0.025'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none;z-index:0;}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:rgba(26,10,0,0.96);backdrop-filter:blur(20px);border-right:1px solid rgba(212,168,83,0.15);z-index:100;display:flex;flex-direction:column;}
+.sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid rgba(212,168,83,0.1);}
+.sidebar-logo .logo-icon{font-size:28px;margin-bottom:6px;}
+.sidebar-logo h1{font-family:'DM Serif Display',serif;font-size:20px;color:var(--latte);line-height:1.1;}
+.sidebar-logo p{font-size:11px;color:rgba(253,246,236,0.4);font-family:'JetBrains Mono',monospace;margin-top:4px;text-transform:uppercase;letter-spacing:1px;}
+.sidebar-nav{flex:1;padding:16px 0;overflow-y:auto;}
+.nav-section-label{font-size:10px;color:rgba(253,246,236,0.3);text-transform:uppercase;letter-spacing:1.5px;padding:12px 24px 6px;font-weight:500;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 24px;cursor:pointer;color:rgba(253,246,236,0.55);font-size:13.5px;font-weight:400;border-left:3px solid transparent;transition:all var(--transition);}
+.nav-item:hover{color:var(--cream);background:rgba(212,168,83,0.07);}
+.nav-item.active{color:var(--latte);background:rgba(212,168,83,0.12);border-left-color:var(--latte);font-weight:600;}
+.nav-item .nav-icon{font-size:16px;width:20px;text-align:center;}
+.nav-badge{margin-left:auto;background:var(--red);color:white;font-size:10px;padding:2px 7px;border-radius:99px;font-weight:600;}
+.sidebar-footer{padding:16px 24px;border-top:1px solid rgba(212,168,83,0.1);font-size:12px;color:rgba(253,246,236,0.3);}
+.sidebar-footer strong{color:rgba(253,246,236,0.5);display:block;margin-bottom:2px;}
+.main{margin-left:240px;min-height:100vh;position:relative;z-index:1;}
+.topbar{height:64px;background:rgba(26,10,0,0.7);backdrop-filter:blur(20px);border-bottom:1px solid rgba(212,168,83,0.1);display:flex;align-items:center;padding:0 32px;gap:16px;position:sticky;top:0;z-index:50;}
+.topbar-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--cream);flex:1;}
+.topbar-date{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--latte);background:rgba(212,168,83,0.1);padding:6px 14px;border-radius:8px;}
+.topbar-btn{background:var(--latte);color:var(--espresso);border:none;padding:8px 18px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all var(--transition);}
+.topbar-btn:hover{background:var(--caramel);transform:translateY(-1px);}
+.content{padding:32px;}
+.page{display:none;animation:fadeUp 0.3s ease;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.section-title{font-family:'DM Serif Display',serif;font-size:26px;color:var(--cream);margin-bottom:6px;}
+.section-sub{font-size:13px;color:rgba(253,246,236,0.45);margin-bottom:28px;}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:32px;}
+.stat-card{background:rgba(253,246,236,0.04);border:1px solid rgba(253,246,236,0.08);border-radius:var(--card-radius);padding:22px 24px;position:relative;overflow:hidden;transition:all var(--transition);}
+.stat-card:hover{background:rgba(253,246,236,0.07);border-color:rgba(212,168,83,0.2);transform:translateY(-2px);}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.stat-card.gold::before{background:linear-gradient(90deg,var(--latte),var(--caramel));}
+.stat-card.green::before{background:linear-gradient(90deg,var(--sage),var(--matcha));}
+.stat-card.red::before{background:linear-gradient(90deg,var(--red),#e57373);}
+.stat-card.amber::before{background:linear-gradient(90deg,var(--amber),#ffb74d);}
+.stat-card.steel::before{background:linear-gradient(90deg,var(--steel),#42a5f5);}
+.stat-card.purple::before{background:linear-gradient(90deg,var(--purple),#ab47bc);}
+.stat-card.teal::before{background:linear-gradient(90deg,var(--teal),#26a69a);}
+.stat-label{font-size:11px;color:rgba(253,246,236,0.45);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.stat-value{font-family:'DM Serif Display',serif;font-size:32px;color:var(--cream);line-height:1;}
+.stat-unit{font-size:13px;color:rgba(253,246,236,0.4);margin-left:4px;}
+.stat-change{margin-top:8px;font-size:12px;display:flex;align-items:center;gap:4px;}
+.stat-change.up{color:var(--matcha);}.stat-change.down{color:#ef9a9a;}.stat-change.warn{color:#ffcc02;}
+.card{background:rgba(253,246,236,0.04);border:1px solid rgba(253,246,236,0.08);border-radius:var(--card-radius);overflow:hidden;margin-bottom:20px;}
+.card-header{padding:18px 24px;border-bottom:1px solid rgba(253,246,236,0.06);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.card-title{font-weight:600;font-size:15px;color:var(--cream);display:flex;align-items:center;gap:8px;}
+.card-body{padding:0;}
+.card-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.data-table{width:100%;border-collapse:collapse;}
+.data-table th{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:rgba(253,246,236,0.35);font-weight:500;padding:12px 16px;text-align:left;border-bottom:1px solid rgba(253,246,236,0.06);background:rgba(0,0,0,0.15);}
+.data-table td{padding:11px 16px;font-size:13px;color:var(--cream);border-bottom:1px solid rgba(253,246,236,0.04);transition:background var(--transition);vertical-align:middle;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tbody tr:hover td{background:rgba(212,168,83,0.05);}
+.data-table .mono{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--latte);}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;letter-spacing:0.3px;}
+.badge.ok{background:rgba(46,125,50,0.2);color:#81c784;}.badge.warn{background:rgba(230,81,0,0.2);color:#ffb74d;}
+.badge.crit{background:rgba(198,40,40,0.2);color:#ef9a9a;}.badge.info{background:rgba(21,101,192,0.2);color:#64b5f6;}
+.badge.purple{background:rgba(106,27,154,0.2);color:#ce93d8;}.badge.gold{background:rgba(212,168,83,0.15);color:var(--latte);}
+.badge.teal{background:rgba(0,105,92,0.2);color:#80cbc4;}
+.progress-wrap{background:rgba(253,246,236,0.08);border-radius:99px;height:6px;flex:1;}
+.progress-bar{height:6px;border-radius:99px;transition:width 0.8s cubic-bezier(0.4,0,0.2,1);}
+.progress-bar.ok{background:linear-gradient(90deg,var(--sage),var(--matcha));}.progress-bar.warn{background:linear-gradient(90deg,var(--amber),#ffb74d);}.progress-bar.crit{background:linear-gradient(90deg,var(--red),#ef5350);}
+.stock-item{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid rgba(253,246,236,0.04);transition:background var(--transition);}
+.stock-item:hover{background:rgba(212,168,83,0.04);}.stock-item:last-child{border-bottom:none;}
+.stock-name{font-size:13.5px;color:var(--cream);font-weight:500;min-width:160px;}
+.stock-qty{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--latte);font-weight:500;min-width:70px;text-align:right;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+@media(max-width:900px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.form-grid.col3{grid-template-columns:1fr 1fr 1fr;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group label{font-size:11.5px;color:rgba(253,246,236,0.5);text-transform:uppercase;letter-spacing:0.8px;}
+.form-input,.form-select,.form-textarea{background:rgba(253,246,236,0.06);border:1px solid rgba(253,246,236,0.12);border-radius:10px;padding:10px 14px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:13.5px;transition:all var(--transition);outline:none;width:100%;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:rgba(212,168,83,0.5);background:rgba(212,168,83,0.06);}
+.form-input::placeholder{color:rgba(253,246,236,0.25);}
+.form-select option{background:var(--roast);color:var(--cream);}
+.form-textarea{resize:vertical;min-height:80px;}
+.form-row{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(253,246,236,0.06);}
+.form-row:last-child{border-bottom:none;}
+.form-row .item-name{flex:2;font-size:13px;color:var(--cream);}
+.form-row .item-code{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--latte);min-width:70px;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:10px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all var(--transition);}
+.btn-primary{background:var(--latte);color:var(--espresso);}
+.btn-primary:hover{background:var(--caramel);transform:translateY(-1px);box-shadow:0 4px 16px rgba(212,168,83,0.3);}
+.btn-ghost{background:transparent;color:rgba(253,246,236,0.6);border:1px solid rgba(253,246,236,0.15);}
+.btn-ghost:hover{color:var(--cream);border-color:rgba(253,246,236,0.3);background:rgba(253,246,236,0.05);}
+.btn-danger{background:rgba(198,40,40,0.15);color:#ef9a9a;border:1px solid rgba(198,40,40,0.3);}
+.btn-danger:hover{background:rgba(198,40,40,0.3);}
+.btn-edit{background:rgba(21,101,192,0.15);color:#90caf9;border:1px solid rgba(21,101,192,0.3);}
+.btn-edit:hover{background:rgba(21,101,192,0.3);}
+.btn-teal{background:rgba(0,105,92,0.2);color:#80cbc4;border:1px solid rgba(0,105,92,0.3);}
+.btn-teal:hover{background:rgba(0,105,92,0.35);}
+.btn-sm{padding:5px 11px;font-size:11.5px;border-radius:7px;}
+.act-col{display:flex;gap:5px;align-items:center;white-space:nowrap;}
+.alert{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-radius:12px;margin-bottom:12px;font-size:13px;border-left:3px solid;}
+.alert.crit{background:rgba(198,40,40,0.1);border-color:var(--red);color:#ffcdd2;}
+.alert.warn{background:rgba(230,81,0,0.1);border-color:var(--amber);color:#ffe0b2;}
+.alert.info{background:rgba(21,101,192,0.1);border-color:var(--steel);color:#bbdefb;}
+.alert.ok{background:rgba(46,125,50,0.1);border-color:var(--sage);color:#c8e6c9;}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:120px;padding:0 4px;}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+.bar{width:100%;border-radius:6px 6px 0 0;transition:height 0.8s cubic-bezier(0.4,0,0.2,1);position:relative;cursor:pointer;}
+.bar:hover::after{content:attr(data-val);position:absolute;top:-24px;left:50%;transform:translateX(-50%);background:var(--roast);color:var(--latte);font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;white-space:nowrap;}
+.bar-label{font-size:11px;color:rgba(253,246,236,0.35);}
+.fifo-row{display:flex;align-items:center;gap:0;padding:12px 20px;border-bottom:1px solid rgba(253,246,236,0.05);}
+.fifo-name{min-width:160px;font-size:13px;color:var(--cream);font-weight:500;}
+.fifo-batches{display:flex;gap:8px;flex:1;}
+.fifo-batch{flex:1;padding:8px 12px;border-radius:10px;font-size:11.5px;}
+.fifo-batch.old{background:rgba(230,81,0,0.12);border:1px solid rgba(230,81,0,0.25);}
+.fifo-batch.new{background:rgba(21,101,192,0.12);border:1px solid rgba(21,101,192,0.2);}
+.fifo-batch .fb-label{font-size:10px;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;}
+.fifo-batch.old .fb-label{color:rgba(255,183,77,0.7);}.fifo-batch.new .fb-label{color:rgba(100,181,246,0.7);}
+.fifo-batch .fb-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;}
+.fifo-batch.old .fb-val{color:#ffb74d;}.fifo-batch.new .fb-val{color:#64b5f6;}
+.fifo-arrow{font-size:20px;color:var(--latte);padding:0 4px;align-self:center;}
+.log-item{display:flex;align-items:flex-start;gap:14px;padding:14px 20px;border-bottom:1px solid rgba(253,246,236,0.04);}
+.log-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.log-dot.in{background:var(--matcha);}.log-dot.out{background:var(--amber);}.log-dot.waste{background:var(--red);}.log-dot.pr{background:#64b5f6;}.log-dot.transfer{background:#80cbc4;}.log-dot.info{background:var(--latte);}
+.log-text{flex:1;font-size:13px;color:var(--cream);line-height:1.5;}
+.log-time{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(253,246,236,0.3);white-space:nowrap;margin-top:2px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;animation:fadeIn 0.2s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:#1e0c02;border:1px solid rgba(212,168,83,0.2);border-radius:20px;width:100%;max-width:620px;max-height:90vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,0.6);animation:slideUp 0.3s cubic-bezier(0.4,0,0.2,1);}
+.modal.wide{max-width:760px;}
+.modal.narrow{max-width:440px;}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-header{padding:24px 28px 0;display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--cream);}
+.modal-close{width:32px;height:32px;border-radius:8px;border:none;background:rgba(253,246,236,0.08);color:var(--cream);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition);}
+.modal-close:hover{background:rgba(253,246,236,0.15);}
+.modal-body{padding:20px 28px 28px;}
+.toast-container{position:fixed;bottom:24px;right:24px;z-index:300;display:flex;flex-direction:column;gap:8px;}
+.toast{background:#2a1200;border:1px solid rgba(212,168,83,0.3);border-radius:12px;padding:12px 18px;min-width:260px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--cream);animation:slideIn 0.3s ease;box-shadow:0 8px 32px rgba(0,0,0,0.4);}
+@keyframes slideIn{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
+.toast.ok .toast-icon{color:var(--matcha);font-size:16px;}.toast.warn .toast-icon{color:#ffb74d;font-size:16px;}
+.report-metric{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid rgba(253,246,236,0.05);}
+.report-metric:last-child{border-bottom:none;}
+.rm-label{font-size:13px;color:rgba(253,246,236,0.6);}
+.rm-value{font-family:'DM Serif Display',serif;font-size:20px;color:var(--latte);}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:rgba(255,255,255,0.03);}
+::-webkit-scrollbar-thumb{background:rgba(212,168,83,0.2);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:rgba(212,168,83,0.35);}
+@media(max-width:768px){.sidebar{transform:translateX(-240px);}.sidebar.open{transform:translateX(0);}.main{margin-left:0;}.content{padding:20px;}.stat-grid{grid-template-columns:1fr 1fr;}.form-grid{grid-template-columns:1fr;}.form-grid.col3{grid-template-columns:1fr;}}
+.divider{height:1px;background:rgba(253,246,236,0.06);margin:20px 0;}
+.tag{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--latte);background:rgba(212,168,83,0.1);padding:2px 8px;border-radius:5px;}
+.empty-state{text-align:center;padding:48px 20px;color:rgba(253,246,236,0.25);}
+.empty-state .empty-icon{font-size:40px;margin-bottom:12px;}
+.empty-state p{font-size:13px;}
+/* ── STORAGE TABS ── */
+.stor-tabs{display:flex;gap:0;border-bottom:1px solid rgba(253,246,236,0.08);margin-bottom:24px;}
+.stor-tab{padding:12px 24px;font-size:13.5px;font-weight:500;cursor:pointer;color:rgba(253,246,236,0.45);border-bottom:2px solid transparent;transition:all var(--transition);display:flex;align-items:center;gap:8px;}
+.stor-tab:hover{color:rgba(253,246,236,0.7);}
+.stor-tab.active-gudang{color:#ffb74d;border-bottom-color:#ffb74d;}
+.stor-tab.active-bar{color:#64b5f6;border-bottom-color:#64b5f6;}
+.stor-panel{display:none;}
+.stor-panel.active{display:block;animation:fadeUp 0.25s ease;}
+.stor-banner{border-radius:14px;padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;gap:16px;}
+.stor-banner.gudang{background:linear-gradient(135deg,rgba(230,81,0,0.12),rgba(230,81,0,0.04));border:1px solid rgba(230,81,0,0.25);}
+.stor-banner.bar{background:linear-gradient(135deg,rgba(21,101,192,0.12),rgba(21,101,192,0.04));border:1px solid rgba(21,101,192,0.25);}
+.stor-icon{font-size:32px;}
+.stor-info h3{font-size:16px;font-weight:600;color:var(--cream);}
+.stor-info p{font-size:12px;color:rgba(253,246,236,0.4);margin-top:3px;}
+/* ── CONFIRM MODAL ── */
+.confirm-box{padding:8px 0;}
+.confirm-icon{font-size:36px;margin-bottom:12px;}
+.confirm-title{font-size:17px;font-weight:600;color:var(--cream);margin-bottom:8px;}
+.confirm-desc{font-size:13px;color:rgba(253,246,236,0.55);line-height:1.6;margin-bottom:24px;}
+</style>
+</head>
+<body>
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">☕</div>
+    <h1>CoffeeOps</h1>
+    <p>v3.0 — Axes Coffee</p>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Utama</div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-icon">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="showPage('inventory',this)"><span class="nav-icon">📦</span> Inventory Harian</div>
+    <div class="nav-item" onclick="showPage('fifo',this)"><span class="nav-icon">🔄</span> FIFO Tracker</div>
+    <div class="nav-section-label" style="margin-top:8px">Storage</div>
+    <div class="nav-item" onclick="showPage('storage',this)"><span class="nav-icon">🏪</span> Gudang &amp; Bar Chiller</div>
+    <div class="nav-item" onclick="showPage('transfer',this)"><span class="nav-icon">↔️</span> Transfer Barang</div>
+    <div class="nav-section-label" style="margin-top:8px">Pengadaan</div>
+    <div class="nav-item" onclick="showPage('purchase',this)">
+      <span class="nav-icon">🛒</span> Purchase Request
+      <span class="nav-badge" id="pr-badge">0</span>
+    </div>
+    <div class="nav-item" onclick="showPage('receiving',this)"><span class="nav-icon">📥</span> Barang Masuk (GRN)</div>
+    <div class="nav-item" onclick="showPage('issue',this)"><span class="nav-icon">📤</span> Barang Keluar</div>
+    <div class="nav-section-label" style="margin-top:8px">Monitoring</div>
+    <div class="nav-item" onclick="showPage('waste',this)"><span class="nav-icon">🗑</span> Waste &amp; Loss Log</div>
+    <div class="nav-item" onclick="showPage('report',this)"><span class="nav-icon">📅</span> Laporan Bulanan</div>
+    <div class="nav-item" onclick="showPage('master',this)"><span class="nav-icon">📋</span> Master Bahan Baku</div>
+  </nav>
+  <div class="sidebar-footer">
+    <strong>Axes Coffee — Ops</strong>
+    Update: <span id="last-update">—</span>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="page-title">Dashboard</div>
+    <div class="topbar-date" id="today-date">—</div>
+    <button class="topbar-btn" onclick="openAddModal()">+ Input Data</button>
+  </div>
+  <div class="content">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="page active" id="page-dashboard">
+      <div class="section-title">Selamat datang ☕</div>
+      <div class="section-sub">Ringkasan operasional hari ini — semua modul terhubung real-time</div>
+      <div id="alert-container"></div>
+      <div class="stat-grid">
+        <div class="stat-card gold"><div class="stat-label">Stok Kritis / Rendah</div><div class="stat-value" id="s-kritis">0 <span class="stat-unit">item</span></div><div class="stat-change warn">⚠ Perlu segera order</div></div>
+        <div class="stat-card green"><div class="stat-label">Barang Keluar Hari Ini</div><div class="stat-value" id="s-keluar">0 <span class="stat-unit">catatan</span></div><div class="stat-change up">↔ Total pengeluaran shift</div></div>
+        <div class="stat-card red"><div class="stat-label">Total Waste</div><div class="stat-value" id="s-waste">0 <span class="stat-unit">unit</span></div><div class="stat-change down">↑ Perlu dianalisa</div></div>
+        <div class="stat-card amber"><div class="stat-label">PR Menunggu</div><div class="stat-value" id="s-pr">0 <span class="stat-unit">PR</span></div><div class="stat-change warn">↔ Belum disetujui</div></div>
+        <div class="stat-card steel"><div class="stat-label">GRN Bulan Ini</div><div class="stat-value" id="s-grn">0 <span class="stat-unit">dok</span></div><div class="stat-change up">↑ Penerimaan barang</div></div>
+        <div class="stat-card teal"><div class="stat-label">Transfer Hari Ini</div><div class="stat-value" id="s-transfer">0 <span class="stat-unit">tx</span></div><div class="stat-change up">↔ Gudang ↔ Bar</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">📦 Stok Kritis</div><button class="btn btn-ghost btn-sm" onclick="showPage('inventory',document.querySelector('[onclick*=inventory]'))">Lihat semua →</button></div>
+          <div class="card-body" id="critical-stock-list"><div class="empty-state"><div class="empty-icon">✅</div><p>Semua stok aman</p></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚡ Aktivitas Terbaru</div></div>
+          <div class="card-body" id="activity-log"><div class="empty-state"><div class="empty-icon">🕐</div><p>Belum ada aktivitas</p></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">📈 Grafik Pengeluaran — 7 Hari Terakhir</div></div>
+        <div class="card-body" style="padding:24px">
+          <div class="bar-chart" id="usage-chart"></div>
+          <div style="display:flex;gap:20px;margin-top:16px;justify-content:center">
+            <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(253,246,236,0.4)"><div style="width:12px;height:12px;border-radius:3px;background:linear-gradient(180deg,#D4A853,#C8956C)"></div>Keluar</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(253,246,236,0.4)"><div style="width:12px;height:12px;border-radius:3px;background:linear-gradient(180deg,#C62828,#ef5350)"></div>Waste</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ INVENTORY ══ -->
+    <div class="page" id="page-inventory">
+      <div class="section-title">📦 Inventory Harian</div>
+      <div class="section-sub">Stok Awal + Masuk − Keluar − Waste = Stok Akhir (otomatis)</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Stok Semua Bahan Baku</div>
+          <div class="card-actions">
+            <button class="btn btn-ghost btn-sm" onclick="openOpnameModal()">📝 Input Opname</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <table class="data-table">
+            <thead><tr><th>Bahan</th><th>Kode</th><th>Sat</th><th>Awal</th><th>Masuk</th><th>Keluar</th><th>Waste</th><th>Akhir</th><th>Par</th><th>Status</th></tr></thead>
+            <tbody id="inventory-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ FIFO ══ -->
+    <div class="page" id="page-fifo">
+      <div class="section-title">🔄 FIFO Tracker</div>
+      <div class="section-sub">Batch lama <span style="color:#ffb74d">ORANGE</span> harus dipakai sebelum batch baru <span style="color:#64b5f6">BIRU</span></div>
+      <div class="alert info"><span>ℹ️</span><span><strong>Aturan FIFO:</strong> Selalu gunakan bahan dengan tanggal masuk paling lama. Tandai batch selesai saat habis.</span></div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Monitoring Batch per Bahan</div><button class="btn btn-primary btn-sm" onclick="openFifoModal()">+ Tambah Batch</button></div>
+        <div class="card-body" id="fifo-list"></div>
+      </div>
+    </div>
+
+    <!-- ══ STORAGE ══ -->
+    <div class="page" id="page-storage">
+      <div class="section-title">🏪 Storage Management</div>
+      <div class="section-sub">Pisahkan stok <strong style="color:#ffb74d">Gudang Utama</strong> (dry/ambient) dengan <strong style="color:#64b5f6">Bar Chiller</strong> (cold/operasional)</div>
+      <div class="stor-tabs">
+        <div class="stor-tab active-gudang" id="tab-gudang" onclick="switchStorTab('gudang')">🏗️ Gudang Utama</div>
+        <div class="stor-tab" id="tab-bar" onclick="switchStorTab('bar')">❄️ Bar Chiller</div>
+      </div>
+      <!-- GUDANG PANEL -->
+      <div class="stor-panel active" id="panel-gudang">
+        <div class="stor-banner gudang">
+          <div class="stor-icon">🏗️</div>
+          <div class="stor-info"><h3>Gudang Utama (Dry / Ambient Storage)</h3><p>Suhu ruang 20–25°C • Kering &amp; kedap udara • Bahan kering, kemasan, packaging, non-perishable</p></div>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" onclick="openStorAddModal('gudang')">+ Tambah Stok</button>
+            <button class="btn btn-teal btn-sm" onclick="openTransferModal('gudang','bar')">↔ Transfer ke Bar</button>
+          </div>
+        </div>
+        <div class="stat-grid" style="margin-bottom:16px">
+          <div class="stat-card amber"><div class="stat-label">Total Item Gudang</div><div class="stat-value" id="g-total">0</div></div>
+          <div class="stat-card red"><div class="stat-label">Stok Kritis</div><div class="stat-value" id="g-kritis">0</div></div>
+          <div class="stat-card gold"><div class="stat-label">Estimasi Nilai</div><div class="stat-value" style="font-size:18px" id="g-nilai">Rp 0</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🏗️ Stok Gudang</div></div>
+          <div class="card-body"><table class="data-table"><thead><tr><th>Bahan</th><th>Kode</th><th>Sat</th><th>Stok Gudang</th><th>Par</th><th>Status</th><th>Penyimpanan</th><th>Aksi</th></tr></thead><tbody id="gudang-tbody"></tbody></table></div>
+        </div>
+      </div>
+      <!-- BAR PANEL -->
+      <div class="stor-panel" id="panel-bar">
+        <div class="stor-banner bar">
+          <div class="stor-icon">❄️</div>
+          <div class="stor-info"><h3>Bar Chiller (Cold / Operasional)</h3><p>Suhu 2–8°C • Kulkas bar • Susu, sirup buka, saus, cold brew — stok siap pakai harian</p></div>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" onclick="openStorAddModal('bar')">+ Tambah Stok</button>
+            <button class="btn btn-teal btn-sm" onclick="openTransferModal('bar','gudang')">↩ Return ke Gudang</button>
+          </div>
+        </div>
+        <div class="stat-grid" style="margin-bottom:16px">
+          <div class="stat-card steel"><div class="stat-label">Total Item Bar</div><div class="stat-value" id="b-total">0</div></div>
+          <div class="stat-card red"><div class="stat-label">Hampir Habis</div><div class="stat-value" id="b-kritis">0</div></div>
+          <div class="stat-card purple"><div class="stat-label">Exp &lt; 3 Hari</div><div class="stat-value" id="b-exp">0</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">❄️ Stok Bar Chiller</div></div>
+          <div class="card-body"><table class="data-table"><thead><tr><th>Bahan</th><th>Kode</th><th>Sat</th><th>Stok Bar</th><th>Par</th><th>Status</th><th>Tgl Buka</th><th>Aksi</th></tr></thead><tbody id="bar-tbody"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TRANSFER ══ -->
+    <div class="page" id="page-transfer">
+      <div class="section-title">↔️ Transfer Barang</div>
+      <div class="section-sub">Pindahkan bahan antar lokasi — stok Gudang &amp; Bar otomatis diperbarui</div>
+      <div class="grid-2" style="margin-bottom:20px">
+        <div class="card" style="border-color:rgba(230,81,0,0.25)">
+          <div class="card-header" style="background:rgba(230,81,0,0.06)">
+            <div class="card-title">🏗️ Gudang → ❄️ Bar</div>
+            <button class="btn btn-primary btn-sm" onclick="openTransferModal('gudang','bar')">+ Transfer</button>
+          </div>
+          <div class="card-body" style="padding:14px 20px"><p style="font-size:13px;color:rgba(253,246,236,0.4)">Ambil bahan dari gudang untuk disiapkan di bar chiller sebelum shift</p></div>
+        </div>
+        <div class="card" style="border-color:rgba(21,101,192,0.25)">
+          <div class="card-header" style="background:rgba(21,101,192,0.06)">
+            <div class="card-title">❄️ Bar → 🏗️ Gudang</div>
+            <button class="btn btn-ghost btn-sm" onclick="openTransferModal('bar','gudang')">↩ Return</button>
+          </div>
+          <div class="card-body" style="padding:14px 20px"><p style="font-size:13px;color:rgba(253,246,236,0.4)">Kembalikan sisa bahan bar yang tidak terpakai ke gudang</p></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">📋 Riwayat Transfer</div></div>
+        <div class="card-body"><table class="data-table"><thead><tr><th>Waktu</th><th>Bahan</th><th>Qty</th><th>Dari</th><th>Ke</th><th>Alasan</th><th>Oleh</th><th>Aksi</th></tr></thead><tbody id="transfer-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ══ PURCHASE REQUEST ══ -->
+    <div class="page" id="page-purchase">
+      <div class="section-title">🛒 Purchase Request</div>
+      <div class="section-sub">Form pengajuan pembelian bahan baku</div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Daftar Purchase Request</div><button class="btn btn-primary btn-sm" onclick="openPRModal()">+ Buat PR Baru</button></div>
+        <div class="card-body"><table class="data-table"><thead><tr><th>No. PR</th><th>Tanggal</th><th>Item</th><th>Total Est.</th><th>Status</th><th>Dibuat Oleh</th><th>Aksi</th></tr></thead><tbody id="pr-table-body"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ══ BARANG MASUK ══ -->
+    <div class="page" id="page-receiving">
+      <div class="section-title">📥 Barang Masuk (GRN)</div>
+      <div class="section-sub">Penerimaan barang — otomatis update stok Gudang atau Bar</div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Riwayat Penerimaan</div><button class="btn btn-primary btn-sm" onclick="openGRNModal()">+ Catat Penerimaan</button></div>
+        <div class="card-body"><table class="data-table"><thead><tr><th>No. GRN</th><th>Tanggal</th><th>Supplier</th><th>Item</th><th>Qty</th><th>Lokasi</th><th>Oleh</th><th>Aksi</th></tr></thead><tbody id="grn-table-body"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ══ BARANG KELUAR ══ -->
+    <div class="page" id="page-issue">
+      <div class="section-title">📤 Barang Keluar</div>
+      <div class="section-sub">Catat pengeluaran bahan dari Bar Chiller — otomatis kurangi stok</div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Log Pengeluaran Bahan</div><button class="btn btn-primary btn-sm" onclick="openIssueModal()">+ Catat Keluar</button></div>
+        <div class="card-body"><table class="data-table"><thead><tr><th>Waktu</th><th>Bahan</th><th>Qty</th><th>Sat</th><th>Kategori</th><th>Shift</th><th>Oleh</th><th>Aksi</th></tr></thead><tbody id="issue-table-body"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ══ WASTE ══ -->
+    <div class="page" id="page-waste">
+      <div class="section-title">🗑 Waste &amp; Loss Log</div>
+      <div class="section-sub">Pencatatan pemborosan, bahan rusak, kadaluarsa</div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Log Waste &amp; Kehilangan</div><button class="btn btn-primary btn-sm" onclick="openWasteModal()">+ Catat Waste</button></div>
+        <div class="card-body"><table class="data-table"><thead><tr><th>Waktu</th><th>Bahan</th><th>Qty</th><th>Penyebab</th><th>Est. Kerugian</th><th>Tindakan</th><th>Oleh</th><th>Aksi</th></tr></thead><tbody id="waste-table-body"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ══ LAPORAN ══ -->
+    <div class="page" id="page-report">
+      <div class="section-title">📅 Laporan Bulanan</div>
+      <div class="section-sub">Rekapitulasi otomatis — tidak perlu input manual</div>
+      <div class="grid-2">
+        <div class="card"><div class="card-header"><div class="card-title">💰 Ringkasan Pengadaan</div></div><div class="card-body" id="report-pengadaan"></div></div>
+        <div class="card"><div class="card-header"><div class="card-title">🗑 Analisis Waste</div></div><div class="card-body" id="report-waste"></div></div>
+      </div>
+      <div class="grid-3">
+        <div class="card"><div class="card-header"><div class="card-title">📦 Stok Akhir Bulan</div></div><div class="card-body" id="report-stok"></div></div>
+        <div class="card"><div class="card-header"><div class="card-title">✅ KPI Pengadaan</div></div><div class="card-body" id="report-kpi"></div></div>
+        <div class="card"><div class="card-header"><div class="card-title">📤 Top Pengeluaran</div></div><div class="card-body" id="report-top"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ MASTER ══ -->
+    <div class="page" id="page-master">
+      <div class="section-title">📋 Master Bahan Baku</div>
+      <div class="section-sub">Database bahan: par level, supplier, suhu penyimpanan, lokasi storage</div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Daftar Master Bahan</div><button class="btn btn-primary btn-sm" onclick="openMasterModal()">+ Tambah Bahan</button></div>
+        <div class="card-body"><table class="data-table"><thead><tr><th>Kode</th><th>Nama Bahan</th><th>Sat</th><th>Par</th><th>Harga</th><th>Supplier</th><th>Lokasi</th><th>Shelf Life</th><th>Aksi</th></tr></thead><tbody id="master-table-body"></tbody></table></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+<!-- ══════ MODALS ══════ -->
+<!-- Issue Modal -->
+<div class="modal-overlay" id="modal-issue">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="issue-modal-title">📤 Catat Barang Keluar</div><button class="modal-close" onclick="closeModal('modal-issue')">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Tanggal &amp; Waktu</label><input type="datetime-local" class="form-input" id="issue-date"></div>
+        <div class="form-group"><label>Shift</label><select class="form-select" id="issue-shift"><option>Pagi (06:00–14:00)</option><option>Siang (13:00–21:00)</option><option>Malam (20:00–23:00)</option></select></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Bahan</label><select class="form-select" id="issue-item"></select></div>
+        <div class="form-group"><label>Qty Keluar</label><input type="number" class="form-input" id="issue-qty" placeholder="0" min="0" step="0.1"></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Kategori</label><select class="form-select" id="issue-cat"><option>Pemakaian Produksi</option><option>Tester / Sample</option><option>Training</option><option>Event / Catering</option><option>Lain-lain</option></select></div>
+        <div class="form-group"><label>Dicatat Oleh</label><input type="text" class="form-input" id="issue-by" placeholder="Nama staff"></div>
+      </div>
+      <div class="form-group"><label>Catatan</label><textarea class="form-textarea" id="issue-note" placeholder="Opsional..."></textarea></div>
+      <input type="hidden" id="issue-edit-idx" value="">
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+        <button class="btn btn-ghost" onclick="closeModal('modal-issue')">Batal</button>
+        <button class="btn btn-primary" id="issue-submit-btn" onclick="submitIssue()">Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Waste Modal -->
+<div class="modal-overlay" id="modal-waste">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="waste-modal-title">🗑 Catat Waste / Loss</div><button class="modal-close" onclick="closeModal('modal-waste')">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Tanggal</label><input type="date" class="form-input" id="waste-date"></div>
+        <div class="form-group"><label>Bahan</label><select class="form-select" id="waste-item"></select></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Qty Waste</label><input type="number" class="form-input" id="waste-qty" placeholder="0" min="0" step="0.1"></div>
+        <div class="form-group"><label>Penyebab</label><select class="form-select" id="waste-cause"><option>Kadaluarsa / Expired</option><option>Tumpah / Spilled</option><option>Kesalahan Produksi</option><option>Rusak Fisik</option><option>Overproduction</option><option>Kesalahan Porsi</option><option>Lain-lain</option></select></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Est. Kerugian (Rp)</label><input type="number" class="form-input" id="waste-loss" placeholder="0"></div>
+        <div class="form-group"><label>Dicatat Oleh</label><input type="text" class="form-input" id="waste-by" placeholder="Nama staff"></div>
+      </div>
+      <div class="form-group"><label>Tindakan Koreksi</label><textarea class="form-textarea" id="waste-action" placeholder="Apa yang dilakukan untuk mencegah kejadian serupa?"></textarea></div>
+      <input type="hidden" id="waste-edit-idx" value="">
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+        <button class="btn btn-ghost" onclick="closeModal('modal-waste')">Batal</button>
+        <button class="btn btn-primary" id="waste-submit-btn" onclick="submitWaste()">Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GRN Modal -->
+<div class="modal-overlay" id="modal-grn">
+  <div class="modal wide">
+    <div class="modal-header"><div class="modal-title">📥 Catat Penerimaan Barang</div><button class="modal-close" onclick="closeModal('modal-grn')">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid col3">
+        <div class="form-group"><label>No. GRN</label><input type="text" class="form-input" id="grn-no" placeholder="Auto"></div>
+        <div class="form-group"><label>Tanggal</label><input type="date" class="form-input" id="grn-date"></div>
+        <div class="form-group"><label>Supplier</label><input type="text" class="form-input" id="grn-supplier" placeholder="Nama supplier"></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Diterima Oleh</label><input type="text" class="form-input" id="grn-by" placeholder="Nama staff"></div>
+        <div class="form-group"><label>Lokasi Simpan</label>
+          <select class="form-select" id="grn-dest">
+            <option value="gudang">🏗️ Gudang Utama</option>
+            <option value="bar">❄️ Bar Chiller</option>
+            <option value="both">Keduanya (50/50)</option>
+          </select>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div style="font-size:12px;color:rgba(253,246,236,0.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Item Diterima</div>
+      <div id="grn-items"></div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="addGrnRow()">+ Tambah Item</button>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+        <button class="btn btn-ghost" onclick="closeModal('modal-grn')">Batal</button>
+        <button class="btn btn-primary" onclick="submitGRN()">Simpan &amp; Update Stok</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PR Modal -->
+<div class="modal-overlay" id="modal-pr">
+  <div class="modal wide">
+    <div class="modal-header"><div class="modal-title">🛒 Buat Purchase Request</div><button class="modal-close" onclick="closeModal('modal-pr')">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid col3">
+        <div class="form-group"><label>No. PR</label><input type="text" class="form-input" id="pr-no" placeholder="Auto"></div>
+        <div class="form-group"><label>Tanggal PR</label><input type="date" class="form-input" id="pr-date"></div>
+        <div class="form-group"><label>Target Terima</label><input type="date" class="form-input" id="pr-target"></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Dibuat Oleh</label><input type="text" class="form-input" id="pr-by" placeholder="Nama staff"></div>
+        <div class="form-group"><label>Supplier Tujuan</label><input type="text" class="form-input" id="pr-supplier" placeholder="Nama supplier"></div>
+      </div>
+      <div class="divider"></div>
+      <div id="pr-items"></div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="addPrRow()">+ Tambah Item</button>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+        <button class="btn btn-ghost" onclick="closeModal('modal-pr')">Batal</button>
+        <button class="btn btn-primary" onclick="submitPR()">Ajukan PR</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Opname Modal -->
+<div class="modal-overlay" id="modal-opname">
+  <div class="modal wide">
+    <div class="modal-header"><div class="modal-title">📝 Input Stock Opname</div><button class="modal-close" onclick="closeModal('modal-opname')">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid col3">
+        <div class="form-group"><label>Tanggal</label><input type="date" class="form-input" id="opn-date"></div>
+        <div class="form-group"><label>Shift</label><select class="form-select" id="opn-shift"><option>Pagi</option><option>Siang</option><option>Malam</option></select></div>
+        <div class="form-group"><label>Dicatat Oleh</label><input type="text" class="form-input" id="opn-by" placeholder="Nama staff"></div>
+      </div>
+      <div class="divider"></div>
+      <div id="opname-items" style="max-height:350px;overflow-y:auto;"></div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+        <button class="btn btn-ghost" onclick="closeModal('modal-opname')">Batal</button>
+        <button class="btn btn-primary" onclick="submitOpname()">Simpan Opname</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FIFO Modal -->
+<div class="modal-overlay" id="modal-fifo">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">🔄 Tambah Batch Baru</div><button class="modal-close" onclick="closeModal('modal-fifo')">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Bahan</label><select class="form-select" id="fifo-item"></select></div>
+        <div class="form-group"><label>Qty Batch</label><input type="number" class="form-input" id="fifo-qty" placeholder="0" min="0" step="0.1"></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Tanggal Masuk</label><input type="date" class="form-input" id="fifo-in"></div>
+        <div class="form-group"><label>Tanggal Kadaluarsa</label><input type="date" class="form-input" id="fifo-exp"></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+        <button class="btn btn-ghost" onclick="closeModal('modal-fifo')">Batal</button>
+        <button class="btn btn-primary" onclick="submitFifo()">Tambah Batch</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Master Modal -->
+<div class="modal-overlay" id="modal-master">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="master-modal-title">📋 Tambah Bahan Baku</div><button class="modal-close" onclick="closeModal('modal-master')">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid col3">
+        <div class="form-group"><label>Kode Item</label><input type="text" class="form-input" id="m-code" placeholder="BK-001"></div>
+        <div class="form-group" style="grid-column:span 2"><label>Nama Bahan</label><input type="text" class="form-input" id="m-name" placeholder="Nama bahan baku"></div>
+      </div>
+      <div class="form-grid col3">
+        <div class="form-group"><label>Satuan</label><input type="text" class="form-input" id="m-unit" placeholder="kg / liter / pcs"></div>
+        <div class="form-group"><label>Par Level</label><input type="number" class="form-input" id="m-par" placeholder="0" min="0"></div>
+        <div class="form-group"><label>Harga Satuan (Rp)</label><input type="number" class="form-input" id="m-price" placeholder="0" min="0"></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Supplier</label><input type="text" class="form-input" id="m-sup" placeholder="Nama supplier"></div>
+        <div class="form-group"><label>Lokasi Storage</label>
+          <select class="form-select" id="m-loc">
+            <option value="gudang">🏗️ Gudang Utama</option>
+            <option value="bar">❄️ Bar Chiller</option>
+            <option value="both">Keduanya</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Suhu Penyimpanan</label><input type="text" class="form-input" id="m-temp" placeholder="Suhu ruang / 2-4°C Kulkas"></div>
+        <div class="form-group"><label>Shelf Life</label><input type="text" class="form-input" id="m-shelf" placeholder="3 bulan / 24 jam setelah buka"></div>
+      </div>
+      <input type="hidden" id="m-edit-code" value="">
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+        <button class="btn btn-ghost" onclick="closeModal('modal-master')">Batal</button>
+        <button class="btn btn-primary" id="master-submit-btn" onclick="submitMaster()">Simpan Bahan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Storage Add Modal -->
+<div class="modal-overlay" id="modal-stor-add">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="stor-add-title">+ Tambah Stok</div><button class="modal-close" onclick="closeModal('modal-stor-add')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="stor-add-loc">
+      <div class="form-grid">
+        <div class="form-group"><label>Bahan</label><select class="form-select" id="stor-add-item"></select></div>
+        <div class="form-group"><label>Qty Tambah</label><input type="number" class="form-input" id="stor-add-qty" placeholder="0" min="0" step="0.1"></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Tanggal Masuk</label><input type="date" class="form-input" id="stor-add-date"></div>
+        <div class="form-group"><label>Dicatat Oleh</label><input type="text" class="form-input" id="stor-add-by" placeholder="Nama staff"></div>
+      </div>
+      <div class="form-group"><label>Catatan</label><input type="text" class="form-input" id="stor-add-note" placeholder="Opsional..."></div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+        <button class="btn btn-ghost" onclick="closeModal('modal-stor-add')">Batal</button>
+        <button class="btn btn-primary" onclick="submitStorAdd()">Tambah Stok</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Transfer Modal -->
+<div class="modal-overlay" id="modal-transfer">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="transfer-modal-title">↔️ Transfer Barang</div><button class="modal-close" onclick="closeModal('modal-transfer')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="tf-from"> <input type="hidden" id="tf-to">
+      <div class="form-grid">
+        <div class="form-group"><label>Bahan</label><select class="form-select" id="tf-item" onchange="updateTfInfo()"></select></div>
+        <div class="form-group"><label>Qty Transfer</label><input type="number" class="form-input" id="tf-qty" placeholder="0" min="0" step="0.1"></div>
+      </div>
+      <div id="tf-info" style="padding:10px 14px;background:rgba(212,168,83,0.06);border-radius:10px;font-size:13px;color:rgba(253,246,236,0.55);margin-bottom:14px">Pilih bahan untuk melihat stok tersedia</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Tanggal</label><input type="date" class="form-input" id="tf-date"></div>
+        <div class="form-group"><label>Dicatat Oleh</label><input type="text" class="form-input" id="tf-by" placeholder="Nama staff"></div>
+      </div>
+      <div class="form-group"><label>Alasan Transfer</label><input type="text" class="form-input" id="tf-reason" placeholder="Contoh: Persiapan shift pagi, restock bar..."></div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+        <button class="btn btn-ghost" onclick="closeModal('modal-transfer')">Batal</button>
+        <button class="btn btn-primary" onclick="submitTransfer()">Simpan Transfer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal narrow">
+    <div class="modal-body" style="padding:28px;text-align:center">
+      <div class="confirm-icon">⚠️</div>
+      <div class="confirm-title">Konfirmasi Hapus</div>
+      <div class="confirm-desc" id="confirm-desc">Data ini akan dihapus permanen.</div>
+      <div style="display:flex;justify-content:center;gap:12px">
+        <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Batal</button>
+        <button class="btn btn-danger" id="confirm-ok-btn">Ya, Hapus</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+<script>
+// ── DB ────────────────────────────────────────────────────
+const DB_KEY='coffeeops_v3';
+function loadDB(){try{const d=JSON.parse(localStorage.getItem(DB_KEY));return d&&d.master?d:initDB();}catch{return initDB();}}
+function saveDB(d){localStorage.setItem(DB_KEY,JSON.stringify(d));}
+function initDB(){
+  const db={master:defaultMaster(),inventory:{},storage:{gudang:{},bar:{}},
+    issues:[],grns:[],prs:[],wastes:[],fifo:{},opnames:[],activities:[],transfers:[]};
+  db.master.forEach(m=>{
+    db.inventory[m.code]={awal:m.par*2|0,masuk:0,keluar:0,waste:0};
+    db.storage.gudang[m.code]=m.loc!=='bar'?(m.par*1.5|0):0;
+    db.storage.bar[m.code]=m.loc!=='gudang'?(m.par*0.5|0):0;
+  });
+  saveDB(db);return db;
+}
+function defaultMaster(){return[
+  {code:'BK-001',name:'Biji Kopi Blend Espresso',unit:'kg',par:2,price:180000,supplier:'Supplier A',temp:'Suhu Ruang 20-25°C',shelf:'2-4 mgg setelah buka',loc:'gudang'},
+  {code:'BK-002',name:'Biji Kopi Single Origin',unit:'kg',par:0.5,price:320000,supplier:'Supplier A',temp:'Suhu Ruang 20-25°C',shelf:'2-4 mgg setelah buka',loc:'gudang'},
+  {code:'BK-004',name:'Cold Brew Concentrate',unit:'liter',par:2,price:85000,supplier:'Internal',temp:'2-4°C Kulkas',shelf:'3-5 hari',loc:'bar'},
+  {code:'SU-001',name:'Susu Full Cream',unit:'liter',par:5,price:22000,supplier:'Supplier B',temp:'2-4°C Kulkas',shelf:'Max 24j setelah buka',loc:'bar'},
+  {code:'SU-002',name:'Susu Skim',unit:'liter',par:2,price:25000,supplier:'Supplier B',temp:'2-4°C Kulkas',shelf:'Max 24j setelah buka',loc:'bar'},
+  {code:'SU-003',name:'Oat Milk',unit:'liter',par:2,price:45000,supplier:'Supplier C',temp:'Kulkas setelah buka',shelf:'7-10 hari buka',loc:'bar'},
+  {code:'SU-004',name:'Almond Milk',unit:'liter',par:1,price:55000,supplier:'Supplier C',temp:'Kulkas setelah buka',shelf:'7 hari buka',loc:'bar'},
+  {code:'SI-001',name:'Sirup Vanilla',unit:'botol',par:2,price:95000,supplier:'Supplier E',temp:'Kulkas setelah buka',shelf:'1 bulan buka',loc:'bar'},
+  {code:'SI-002',name:'Sirup Caramel',unit:'botol',par:2,price:95000,supplier:'Supplier E',temp:'Kulkas setelah buka',shelf:'1 bulan buka',loc:'bar'},
+  {code:'SI-003',name:'Sirup Hazelnut',unit:'botol',par:1,price:95000,supplier:'Supplier E',temp:'Kulkas setelah buka',shelf:'1 bulan buka',loc:'bar'},
+  {code:'SI-005',name:'Gula Pasir',unit:'kg',par:1,price:18000,supplier:'Supplier F',temp:'Suhu ruang kedap',shelf:'6 bulan',loc:'gudang'},
+  {code:'PW-001',name:'Chocolate Powder',unit:'kg',par:0.5,price:120000,supplier:'Supplier G',temp:'Suhu ruang kedap',shelf:'6 bulan',loc:'gudang'},
+  {code:'PW-002',name:'Matcha Powder',unit:'gr',par:100,price:85000,supplier:'Supplier H',temp:'Suhu ruang kedap',shelf:'3 bulan buka',loc:'gudang'},
+  {code:'PW-004',name:'Caramel Sauce',unit:'botol',par:2,price:75000,supplier:'Supplier G',temp:'Kulkas setelah buka',shelf:'1 bulan',loc:'bar'},
+  {code:'KM-001',name:'Cup 8oz (Hot)',unit:'pcs',par:100,price:850,supplier:'Supplier I',temp:'Suhu ruang kering',shelf:'—',loc:'gudang'},
+  {code:'KM-002',name:'Cup 12oz (Hot)',unit:'pcs',par:100,price:950,supplier:'Supplier I',temp:'Suhu ruang kering',shelf:'—',loc:'gudang'},
+  {code:'KM-003',name:'Cup 16oz (Cold)',unit:'pcs',par:100,price:1100,supplier:'Supplier I',temp:'Suhu ruang kering',shelf:'—',loc:'gudang'},
+  {code:'KM-004',name:'Lid / Tutup Cup',unit:'pcs',par:300,price:350,supplier:'Supplier I',temp:'Suhu ruang kering',shelf:'—',loc:'gudang'},
+  {code:'KM-005',name:'Straw / Sedotan',unit:'pcs',par:100,price:200,supplier:'Supplier I',temp:'Suhu ruang kering',shelf:'—',loc:'gudang'},
+];}
+
+let db=loadDB();
+// Migrate old DB: ensure storage & transfers exist
+if(!db.storage){db.storage={gudang:{},bar:{}};}
+if(!db.transfers){db.transfers=[];}
+if(!db.activities){db.activities=[];}
+db.master.forEach(m=>{
+  if(db.storage.gudang[m.code]===undefined)db.storage.gudang[m.code]=0;
+  if(db.storage.bar[m.code]===undefined)db.storage.bar[m.code]=0;
+  if(!m.loc)m.loc='gudang';
+});
+
+// ── HELPERS ───────────────────────────────────────────────
+function fmtRp(n){return 'Rp '+(n||0).toLocaleString('id-ID');}
+function nowStr(){return new Date().toLocaleString('id-ID');}
+function todayStr(){return new Date().toISOString().split('T')[0];}
+function getMaster(code){return db.master.find(m=>m.code===code)||{};}
+function getStockAkhir(code){const i=db.inventory[code]||{};return Math.max(0,(i.awal||0)+(i.masuk||0)-(i.keluar||0)-(i.waste||0));}
+function getStor(loc,code){return(db.storage[loc]&&db.storage[loc][code])||0;}
+function setStor(loc,code,val){if(!db.storage[loc])db.storage[loc]={};db.storage[loc][code]=Math.max(0,val);}
+function getStatus(code){const m=getMaster(code);const s=getStockAkhir(code);if(s<=0)return{label:'Habis',cls:'crit'};if(s<=(m.par||0))return{label:'Kritis',cls:'crit'};if(s<=(m.par||0)*1.5)return{label:'Rendah',cls:'warn'};return{label:'Aman',cls:'ok'};}
+function getStorStatus(qty,par){if(qty<=0)return{label:'Habis',cls:'crit'};if(qty<=(par||0))return{label:'Kritis',cls:'crit'};if(qty<=(par||0)*1.5)return{label:'Rendah',cls:'warn'};return{label:'Aman',cls:'ok'};}
+function addAct(icon,text,type){db.activities=db.activities||[];db.activities.unshift({icon,text,type,time:nowStr()});if(db.activities.length>40)db.activities.pop();}
+function toast(msg,type='ok'){const tc=document.getElementById('toast-container');const t=document.createElement('div');t.className='toast '+type;t.innerHTML='<span class="toast-icon">'+(type==='ok'?'✓':'⚠')+'</span><span>'+msg+'</span>';tc.prepend(t);setTimeout(()=>t.remove(),3500);}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function popSel(id,items,valFn,labelFn,blank){const s=document.getElementById(id);if(!s)return;s.innerHTML=(blank?'<option value="">'+blank+'</option>':'');items.forEach(m=>s.innerHTML+=`<option value="${valFn(m)}">${labelFn(m)}</option>`);}
+
+// ── CONFIRM DELETE ────────────────────────────────────────
+let _confirmFn=null;
+function askConfirm(desc,fn){
+  document.getElementById('confirm-desc').textContent=desc;
+  _confirmFn=fn;
+  const btn=document.getElementById('confirm-ok-btn');
+  btn.onclick=()=>{if(_confirmFn)_confirmFn();closeModal('modal-confirm');};
+  openModal('modal-confirm');
+}
+
+// ── NAVIGATION ────────────────────────────────────────────
+function showPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el)el.classList.add('active');
+  document.getElementById('page-title').textContent=el?el.querySelector('.nav-icon').nextSibling.textContent.trim():id;
+  renderPage(id);
+}
+function renderPage(id){
+  ({dashboard:renderDashboard,inventory:renderInventory,fifo:renderFifo,
+    storage:renderStorage,transfer:renderTransfer,
+    purchase:renderPR,receiving:renderGRN,issue:renderIssue,
+    waste:renderWaste,report:renderReport,master:renderMaster}[id]||function(){})();
+}
+
+// ── STORAGE TABS ──────────────────────────────────────────
+function switchStorTab(loc){
+  ['gudang','bar'].forEach(l=>{
+    document.getElementById('tab-'+l).className='stor-tab'+(l===loc?' active-'+l:'');
+    document.getElementById('panel-'+l).className='stor-panel'+(l===loc?' active':'');
+  });
+}
+
+// ── OPEN MODALS ───────────────────────────────────────────
+function openAddModal(){
+  const pg=document.querySelector('.page.active')?.id.replace('page-','');
+  ({issue:openIssueModal,waste:openWasteModal,receiving:openGRNModal,purchase:openPRModal,
+    fifo:openFifoModal,master:()=>openMasterModal(),inventory:openOpnameModal,
+    storage:()=>openStorAddModal('gudang'),transfer:()=>openTransferModal('gudang','bar')}[pg]||openIssueModal)();
+}
+
+function openIssueModal(editIdx){
+  popSel('issue-item',db.master,m=>m.code,m=>m.name+' ('+m.unit+')',' — Pilih Bahan —');
+  document.getElementById('issue-date').value=new Date().toISOString().slice(0,16);
+  document.getElementById('issue-edit-idx').value='';
+  document.getElementById('issue-modal-title').textContent='📤 Catat Barang Keluar';
+  document.getElementById('issue-submit-btn').textContent='Simpan';
+  document.getElementById('issue-qty').value='';
+  document.getElementById('issue-by').value='';
+  document.getElementById('issue-note').value='';
+  if(editIdx!=null){
+    const r=db.issues[editIdx];
+    document.getElementById('issue-item').value=r.code;
+    document.getElementById('issue-date').value=r.isoDate||new Date().toISOString().slice(0,16);
+    document.getElementById('issue-qty').value=r.qty;
+    document.getElementById('issue-shift').value=r.shift;
+    document.getElementById('issue-cat').value=r.cat;
+    document.getElementById('issue-by').value=r.by;
+    document.getElementById('issue-note').value=r.note||'';
+    document.getElementById('issue-edit-idx').value=editIdx;
+    document.getElementById('issue-modal-title').textContent='✏️ Edit Barang Keluar';
+    document.getElementById('issue-submit-btn').textContent='Update';
+  }
+  openModal('modal-issue');
+}
+
+function openWasteModal(editIdx){
+  popSel('waste-item',db.master,m=>m.code,m=>m.name+' ('+m.unit+')',' — Pilih Bahan —');
+  document.getElementById('waste-date').value=todayStr();
+  document.getElementById('waste-edit-idx').value='';
+  document.getElementById('waste-modal-title').textContent='🗑 Catat Waste / Loss';
+  document.getElementById('waste-submit-btn').textContent='Simpan';
+  document.getElementById('waste-qty').value='';document.getElementById('waste-loss').value='';
+  document.getElementById('waste-by').value='';document.getElementById('waste-action').value='';
+  if(editIdx!=null){
+    const r=db.wastes[editIdx];
+    document.getElementById('waste-item').value=r.code;
+    document.getElementById('waste-date').value=r.rawDate||todayStr();
+    document.getElementById('waste-qty').value=r.qty;
+    document.getElementById('waste-cause').value=r.cause;
+    document.getElementById('waste-loss').value=r.loss;
+    document.getElementById('waste-by').value=r.by;
+    document.getElementById('waste-action').value=r.action||'';
+    document.getElementById('waste-edit-idx').value=editIdx;
+    document.getElementById('waste-modal-title').textContent='✏️ Edit Waste';
+    document.getElementById('waste-submit-btn').textContent='Update';
+  }
+  openModal('modal-waste');
+}
+
+function openGRNModal(){
+  document.getElementById('grn-date').value=todayStr();
+  document.getElementById('grn-no').value='GRN-'+Date.now().toString().slice(-6);
+  document.getElementById('grn-supplier').value='';document.getElementById('grn-by').value='';
+  document.getElementById('grn-items').innerHTML=buildGrnRow();
+  openModal('modal-grn');
+}
+function buildGrnRow(){
+  const opts=db.master.map(m=>`<option value="${m.code}">${m.name} (${m.unit})</option>`).join('');
+  return `<div class="form-row">
+    <select class="form-select" style="flex:2"><option value="">— Pilih —</option>${opts}</select>
+    <input type="number" class="form-input" placeholder="Qty" style="flex:0.7;min-width:70px" min="0" step="0.1">
+    <input type="date" class="form-input" style="flex:0.9" title="Tgl Kadaluarsa">
+    <select class="form-select" style="flex:0.8"><option>✓ Baik</option><option>⚠ Cek</option><option>✗ Tolak</option></select>
+    <button onclick="this.closest('.form-row').remove()" class="btn btn-danger btn-sm" style="flex:none">✕</button>
+  </div>`;
+}
+function addGrnRow(){document.getElementById('grn-items').insertAdjacentHTML('beforeend',buildGrnRow());}
+
+function openPRModal(){
+  document.getElementById('pr-date').value=todayStr();
+  document.getElementById('pr-no').value='PR-'+Date.now().toString().slice(-6);
+  document.getElementById('pr-by').value='';document.getElementById('pr-supplier').value='';
+  const opts=db.master.map(m=>`<option value="${m.code}" data-price="${m.price}">${m.name} (${m.unit})</option>`).join('');
+  document.getElementById('pr-items').innerHTML=`<div class="form-row">
+    <select class="form-select" style="flex:2" onchange="calcPrRow(this)"><option value="">— Pilih —</option>${opts}</select>
+    <input type="number" class="form-input" placeholder="Qty" style="flex:0.7;min-width:70px" min="0" oninput="calcPrRow(this.closest('.form-row').querySelector('select'))">
+    <input type="number" class="form-input" placeholder="Harga (Rp)" style="flex:0.9" min="0" oninput="calcPrRow(this.closest('.form-row').querySelector('select'))">
+    <div class="form-input pr-total" style="flex:0.8;background:rgba(212,168,83,0.06);color:var(--latte);font-family:'JetBrains Mono',monospace;font-size:12px">Rp 0</div>
+    <button onclick="this.closest('.form-row').remove()" class="btn btn-danger btn-sm" style="flex:none">✕</button>
+  </div>`;
+  openModal('modal-pr');
+}
+function addPrRow(){
+  const opts=db.master.map(m=>`<option value="${m.code}" data-price="${m.price}">${m.name} (${m.unit})</option>`).join('');
+  document.getElementById('pr-items').insertAdjacentHTML('beforeend',`<div class="form-row">
+    <select class="form-select" style="flex:2" onchange="calcPrRow(this)"><option value="">— Pilih —</option>${opts}</select>
+    <input type="number" class="form-input" placeholder="Qty" style="flex:0.7;min-width:70px" min="0" oninput="calcPrRow(this.closest('.form-row').querySelector('select'))">
+    <input type="number" class="form-input" placeholder="Harga (Rp)" style="flex:0.9" min="0" oninput="calcPrRow(this.closest('.form-row').querySelector('select'))">
+    <div class="form-input pr-total" style="flex:0.8;background:rgba(212,168,83,0.06);color:var(--latte);font-family:'JetBrains Mono',monospace;font-size:12px">Rp 0</div>
+    <button onclick="this.closest('.form-row').remove()" class="btn btn-danger btn-sm" style="flex:none">✕</button>
+  </div>`);
+}
+function calcPrRow(sel){
+  const row=sel.closest('.form-row');
+  const qty=parseFloat(row.querySelectorAll('input')[0]?.value)||0;
+  const price=parseFloat(row.querySelectorAll('input')[1]?.value)||parseFloat(sel.selectedOptions[0]?.dataset.price)||0;
+  const tot=row.querySelector('.pr-total');
+  if(tot)tot.textContent='Rp '+(qty*price).toLocaleString('id-ID');
+}
+
+function openFifoModal(){
+  popSel('fifo-item',db.master,m=>m.code,m=>m.name+' ('+m.unit+')',' — Pilih —');
+  document.getElementById('fifo-in').value=todayStr();
+  document.getElementById('fifo-qty').value='';document.getElementById('fifo-exp').value='';
+  openModal('modal-fifo');
+}
+
+function openOpnameModal(){
+  document.getElementById('opn-date').value=todayStr();
+  document.getElementById('opname-items').innerHTML=db.master.map(m=>{
+    const s=getStockAkhir(m.code);
+    return `<div class="form-row"><div class="item-code">${m.code}</div><div class="item-name">${m.name}</div>
+      <span style="font-size:12px;color:rgba(253,246,236,0.4);min-width:30px">${m.unit}</span>
+      <input type="number" class="form-input" style="flex:0.8;max-width:120px" min="0" step="0.1" data-code="${m.code}" value="${s}"></div>`;
+  }).join('');
+  openModal('modal-opname');
+}
+
+function openMasterModal(editCode){
+  document.getElementById('m-edit-code').value=editCode||'';
+  document.getElementById('master-modal-title').textContent=editCode?'✏️ Edit Bahan Baku':'📋 Tambah Bahan Baku';
+  document.getElementById('master-submit-btn').textContent=editCode?'Update Bahan':'Simpan Bahan';
+  const m=editCode?getMaster(editCode):{};
+  document.getElementById('m-code').value=m.code||'';document.getElementById('m-code').readOnly=!!editCode;
+  document.getElementById('m-name').value=m.name||'';document.getElementById('m-unit').value=m.unit||'';
+  document.getElementById('m-par').value=m.par||'';document.getElementById('m-price').value=m.price||'';
+  document.getElementById('m-sup').value=m.supplier||'';document.getElementById('m-loc').value=m.loc||'gudang';
+  document.getElementById('m-temp').value=m.temp||'';document.getElementById('m-shelf').value=m.shelf||'';
+  openModal('modal-master');
+}
+
+function openStorAddModal(loc){
+  document.getElementById('stor-add-loc').value=loc;
+  document.getElementById('stor-add-title').textContent=(loc==='gudang'?'🏗️ Tambah Stok Gudang':'❄️ Tambah Stok Bar Chiller');
+  popSel('stor-add-item',db.master,m=>m.code,m=>m.name+' ('+m.unit+')',' — Pilih Bahan —');
+  document.getElementById('stor-add-date').value=todayStr();
+  document.getElementById('stor-add-qty').value='';
+  document.getElementById('stor-add-by').value='';
+  document.getElementById('stor-add-note').value='';
+  openModal('modal-stor-add');
+}
+
+function openTransferModal(from,to,preCode){
+  document.getElementById('tf-from').value=from;
+  document.getElementById('tf-to').value=to;
+  const lbls={gudang:'🏗️ Gudang',bar:'❄️ Bar Chiller'};
+  document.getElementById('transfer-modal-title').textContent='↔️ '+lbls[from]+' → '+lbls[to];
+  popSel('tf-item',db.master,m=>m.code,m=>m.name+' ('+m.unit+')',' — Pilih Bahan —');
+  if(preCode)document.getElementById('tf-item').value=preCode;
+  document.getElementById('tf-qty').value='';
+  document.getElementById('tf-date').value=todayStr();
+  document.getElementById('tf-by').value='';
+  document.getElementById('tf-reason').value='';
+  updateTfInfo();
+  openModal('modal-transfer');
+}
+function updateTfInfo(){
+  const from=document.getElementById('tf-from').value;
+  const code=document.getElementById('tf-item').value;
+  const el=document.getElementById('tf-info');
+  if(!code){el.textContent='Pilih bahan untuk melihat stok tersedia';return;}
+  const m=getMaster(code);
+  const qty=getStor(from,code);
+  const st=getStorStatus(qty,m.par);
+  el.innerHTML='<strong>'+m.name+'</strong> — Stok di '+(from==='gudang'?'🏗️ Gudang':'❄️ Bar')+': <strong style="color:'+(qty>0?'#81c784':'#ef9a9a')+'">'+qty+' '+m.unit+'</strong> <span class="badge '+st.cls+'" style="margin-left:6px">'+st.label+'</span>';
+}
+
+// ── SUBMIT FUNCTIONS ──────────────────────────────────────
+function submitIssue(){
+  const code=document.getElementById('issue-item').value;
+  const qty=parseFloat(document.getElementById('issue-qty').value)||0;
+  const cat=document.getElementById('issue-cat').value;
+  const by=document.getElementById('issue-by').value||'—';
+  const shift=document.getElementById('issue-shift').value;
+  const note=document.getElementById('issue-note').value;
+  const isoDate=document.getElementById('issue-date').value;
+  const editIdx=document.getElementById('issue-edit-idx').value;
+  if(!code||qty<=0){toast('Pilih bahan & isi qty','warn');return;}
+  const m=getMaster(code);
+  if(editIdx!==''){
+    // Reverse old effect
+    const old=db.issues[parseInt(editIdx)];
+    const oldM=getMaster(old.code);
+    if(db.inventory[old.code])db.inventory[old.code].keluar=Math.max(0,(db.inventory[old.code].keluar||0)-old.qty);
+    setStor('bar',old.code,getStor('bar',old.code)+old.qty);
+    // Apply new
+    db.inventory[code]=db.inventory[code]||{awal:0,masuk:0,keluar:0,waste:0};
+    db.inventory[code].keluar=(db.inventory[code].keluar||0)+qty;
+    setStor('bar',code,getStor('bar',code)-qty);
+    db.issues[parseInt(editIdx)]={time:nowStr(),isoDate,code,name:m.name,qty,unit:m.unit,cat,by,shift,note};
+    toast('✓ Data keluar '+m.name+' diperbarui');
+  } else {
+    db.inventory[code]=db.inventory[code]||{awal:0,masuk:0,keluar:0,waste:0};
+    db.inventory[code].keluar=(db.inventory[code].keluar||0)+qty;
+    setStor('bar',code,getStor('bar',code)-qty);
+    db.issues.push({time:nowStr(),isoDate,code,name:m.name,qty,unit:m.unit,cat,by,shift,note});
+    addAct('📤',m.name+' keluar '+qty+' '+m.unit+' — '+cat+' ('+by+')','out');
+    toast('✓ '+m.name+' '+qty+' '+m.unit+' dicatat keluar');
+  }
+  saveDB(db);closeModal('modal-issue');refreshDashboardStats();renderIssue();
+}
+
+function submitWaste(){
+  const code=document.getElementById('waste-item').value;
+  const qty=parseFloat(document.getElementById('waste-qty').value)||0;
+  const cause=document.getElementById('waste-cause').value;
+  const loss=parseFloat(document.getElementById('waste-loss').value)||0;
+  const by=document.getElementById('waste-by').value||'—';
+  const action=document.getElementById('waste-action').value;
+  const rawDate=document.getElementById('waste-date').value;
+  const editIdx=document.getElementById('waste-edit-idx').value;
+  if(!code||qty<=0){toast('Pilih bahan & isi qty','warn');return;}
+  const m=getMaster(code);
+  if(editIdx!==''){
+    const old=db.wastes[parseInt(editIdx)];
+    if(db.inventory[old.code])db.inventory[old.code].waste=Math.max(0,(db.inventory[old.code].waste||0)-old.qty);
+    db.inventory[code]=db.inventory[code]||{awal:0,masuk:0,keluar:0,waste:0};
+    db.inventory[code].waste=(db.inventory[code].waste||0)+qty;
+    db.wastes[parseInt(editIdx)]={time:nowStr(),rawDate,code,name:m.name,qty,unit:m.unit,cause,loss,by,action};
+    toast('✓ Data waste '+m.name+' diperbarui');
+  } else {
+    db.inventory[code]=db.inventory[code]||{awal:0,masuk:0,keluar:0,waste:0};
+    db.inventory[code].waste=(db.inventory[code].waste||0)+qty;
+    db.wastes.push({time:nowStr(),rawDate,code,name:m.name,qty,unit:m.unit,cause,loss,by,action});
+    addAct('🗑','WASTE: '+m.name+' '+qty+' '+m.unit+' — '+cause,'waste');
+    toast('Waste '+m.name+' dicatat','warn');
+  }
+  saveDB(db);closeModal('modal-waste');refreshDashboardStats();renderWaste();
+}
+
+function submitGRN(){
+  const no=document.getElementById('grn-no').value||('GRN-'+Date.now().toString().slice(-6));
+  const date=document.getElementById('grn-date').value;
+  const sup=document.getElementById('grn-supplier').value||'—';
+  const by=document.getElementById('grn-by').value||'—';
+  const dest=document.getElementById('grn-dest').value;
+  const rows=document.querySelectorAll('#grn-items .form-row');
+  let items=[],totalQty=0;
+  rows.forEach(row=>{
+    const sels=row.querySelectorAll('select');
+    const inps=row.querySelectorAll('input');
+    const code=sels[0]?.value;const qty=parseFloat(inps[0]?.value)||0;
+    const kondisi=sels[1]?.value||'✓ Baik';
+    if(code&&qty>0){
+      const m=getMaster(code);
+      db.inventory[code]=db.inventory[code]||{awal:0,masuk:0,keluar:0,waste:0};
+      if(!kondisi.includes('Tolak')){
+        db.inventory[code].masuk=(db.inventory[code].masuk||0)+qty;
+        if(dest==='gudang'||dest==='both')setStor('gudang',code,getStor('gudang',code)+(dest==='both'?qty/2:qty));
+        if(dest==='bar'||dest==='both')setStor('bar',code,getStor('bar',code)+(dest==='both'?qty/2:qty));
+      }
+      items.push({code,name:m.name,qty,unit:m.unit,kondisi});totalQty+=qty;
+      addAct('📥','Terima '+m.name+' '+qty+' '+m.unit+' dari '+sup,'in');
+    }
+  });
+  if(!items.length){toast('Tambahkan minimal 1 item','warn');return;}
+  db.grns.push({no,date,supplier:sup,by,dest,items,totalQty,totalItems:items.length});
+  saveDB(db);closeModal('modal-grn');
+  toast('GRN '+no+' — '+items.length+' item dari '+sup);
+  refreshDashboardStats();renderGRN();
+}
+
+function submitPR(){
+  const no=document.getElementById('pr-no').value||('PR-'+Date.now().toString().slice(-6));
+  const date=document.getElementById('pr-date').value;
+  const by=document.getElementById('pr-by').value||'—';
+  const sup=document.getElementById('pr-supplier').value||'—';
+  const rows=document.querySelectorAll('#pr-items .form-row');
+  let items=[],total=0;
+  rows.forEach(row=>{
+    const sel=row.querySelector('select');const inps=row.querySelectorAll('input');
+    const code=sel?.value;const qty=parseFloat(inps[0]?.value)||0;
+    const price=parseFloat(inps[1]?.value)||parseFloat(sel?.selectedOptions[0]?.dataset.price)||0;
+    if(code&&qty>0){const m=getMaster(code);items.push({code,name:m.name,qty,unit:m.unit,price,subtotal:qty*price});total+=qty*price;}
+  });
+  if(!items.length){toast('Tambahkan minimal 1 item','warn');return;}
+  db.prs.push({no,date,by,supplier:sup,items,total,status:'Menunggu Approval'});
+  addAct('🛒','PR '+no+' diajukan — '+items.length+' item, '+fmtRp(total),'pr');
+  saveDB(db);
+  document.getElementById('pr-badge').textContent=db.prs.filter(p=>p.status==='Menunggu Approval').length;
+  closeModal('modal-pr');toast('PR '+no+' berhasil diajukan');renderPR();
+}
+
+function approvePR(no){
+  const pr=db.prs.find(p=>p.no===no);
+  if(pr){pr.status='Disetujui';saveDB(db);renderPR();toast('PR '+no+' disetujui');}
+  document.getElementById('pr-badge').textContent=db.prs.filter(p=>p.status==='Menunggu Approval').length;
+}
+
+function submitFifo(){
+  const code=document.getElementById('fifo-item').value;
+  const qty=parseFloat(document.getElementById('fifo-qty').value)||0;
+  const inDate=document.getElementById('fifo-in').value;
+  const expDate=document.getElementById('fifo-exp').value;
+  if(!code||qty<=0){toast('Pilih bahan & isi qty','warn');return;}
+  const m=getMaster(code);
+  db.fifo[code]=db.fifo[code]||[];
+  db.fifo[code].push({qty,inDate,expDate,used:false});
+  db.fifo[code].sort((a,b)=>new Date(a.inDate)-new Date(b.inDate));
+  saveDB(db);closeModal('modal-fifo');toast('Batch '+m.name+' '+qty+' '+m.unit+' ditambahkan');renderFifo();
+}
+function markFifoUsed(code,idx){
+  if(db.fifo[code]&&db.fifo[code][idx]){db.fifo[code][idx].used=true;saveDB(db);renderFifo();toast('Batch ditandai selesai');}
+}
+
+function submitOpname(){
+  document.querySelectorAll('#opname-items input[data-code]').forEach(inp=>{
+    const code=inp.dataset.code;const val=parseFloat(inp.value);
+    if(!isNaN(val)){db.inventory[code]={awal:val,masuk:0,keluar:0,waste:0};}
+  });
+  saveDB(db);closeModal('modal-opname');toast('Stock opname disimpan ✓');renderInventory();refreshDashboardStats();
+}
+
+function submitMaster(){
+  const editCode=document.getElementById('m-edit-code').value;
+  const code=document.getElementById('m-code').value.trim();
+  const name=document.getElementById('m-name').value.trim();
+  const unit=document.getElementById('m-unit').value.trim();
+  const par=parseFloat(document.getElementById('m-par').value)||0;
+  const price=parseFloat(document.getElementById('m-price').value)||0;
+  const sup=document.getElementById('m-sup').value.trim();
+  const loc=document.getElementById('m-loc').value;
+  const temp=document.getElementById('m-temp').value.trim();
+  const shelf=document.getElementById('m-shelf').value.trim();
+  if(!code||!name||!unit){toast('Kode, nama, satuan wajib diisi','warn');return;}
+  if(editCode){
+    const idx=db.master.findIndex(m=>m.code===editCode);
+    if(idx>-1){db.master[idx]={code,name,unit,par,price,supplier:sup,loc,temp,shelf};}
+  } else {
+    if(db.master.find(m=>m.code===code)){toast('Kode sudah ada','warn');return;}
+    db.master.push({code,name,unit,par,price,supplier:sup,loc,temp,shelf});
+    db.inventory[code]={awal:0,masuk:0,keluar:0,waste:0};
+    setStor('gudang',code,0);setStor('bar',code,0);
+  }
+  saveDB(db);closeModal('modal-master');toast((editCode?'Bahan '+name+' diperbarui':'Bahan '+name+' ditambahkan'));renderMaster();
+}
+
+function deleteMaster(code){
+  const m=getMaster(code);
+  askConfirm('Hapus bahan "'+m.name+'" dari master? Data inventory/history tidak terhapus.',()=>{
+    db.master=db.master.filter(x=>x.code!==code);
+    saveDB(db);renderMaster();toast('Bahan '+m.name+' dihapus','warn');
+  });
+}
+
+function submitStorAdd(){
+  const loc=document.getElementById('stor-add-loc').value;
+  const code=document.getElementById('stor-add-item').value;
+  const qty=parseFloat(document.getElementById('stor-add-qty').value)||0;
+  const by=document.getElementById('stor-add-by').value||'—';
+  const note=document.getElementById('stor-add-note').value;
+  if(!code||qty<=0){toast('Pilih bahan & isi qty','warn');return;}
+  const m=getMaster(code);
+  setStor(loc,code,getStor(loc,code)+qty);
+  addAct(loc==='gudang'?'🏗️':'❄️',m.name+' +'+qty+' '+m.unit+' → '+(loc==='gudang'?'Gudang':'Bar Chiller')+' ('+by+')','in');
+  saveDB(db);closeModal('modal-stor-add');
+  toast('✓ '+m.name+' +'+qty+' '+m.unit+' di '+(loc==='gudang'?'Gudang':'Bar Chiller'));
+  renderStorage();refreshDashboardStats();
+}
+
+function submitTransfer(){
+  const from=document.getElementById('tf-from').value;
+  const to=document.getElementById('tf-to').value;
+  const code=document.getElementById('tf-item').value;
+  const qty=parseFloat(document.getElementById('tf-qty').value)||0;
+  const by=document.getElementById('tf-by').value||'—';
+  const reason=document.getElementById('tf-reason').value||'—';
+  const date=document.getElementById('tf-date').value;
+  if(!code||qty<=0){toast('Pilih bahan & isi qty','warn');return;}
+  const avail=getStor(from,code);
+  if(qty>avail){toast('Stok '+(from==='gudang'?'Gudang':'Bar')+' hanya '+avail+' unit','warn');return;}
+  const m=getMaster(code);
+  setStor(from,code,getStor(from,code)-qty);
+  setStor(to,code,getStor(to,code)+qty);
+  const lbls={gudang:'🏗️ Gudang',bar:'❄️ Bar'};
+  db.transfers.push({time:nowStr(),date,code,name:m.name,qty,unit:m.unit,from,to,reason,by});
+  addAct('↔️',m.name+' '+qty+' '+m.unit+': '+lbls[from]+' → '+lbls[to]+' ('+by+')','transfer');
+  saveDB(db);closeModal('modal-transfer');
+  toast('✓ '+m.name+' '+qty+' '+m.unit+' ditransfer ke '+(to==='gudang'?'Gudang':'Bar'));
+  renderTransfer();renderStorage();refreshDashboardStats();
+}
+
+function deleteTransfer(idx){
+  const t=db.transfers[idx];
+  askConfirm('Hapus transfer ini? Stok akan dikembalikan ke posisi asal.',()=>{
+    setStor(t.to,t.code,getStor(t.to,t.code)-t.qty);
+    setStor(t.from,t.code,getStor(t.from,t.code)+t.qty);
+    db.transfers.splice(idx,1);
+    saveDB(db);renderTransfer();renderStorage();toast('Transfer dihapus, stok dikembalikan','warn');
+  });
+}
+
+function deleteIssue(idx){
+  const r=db.issues[idx];
+  askConfirm('Hapus catatan keluar "'+r.name+' '+r.qty+' '+r.unit+'"? Stok bar akan dikembalikan.',()=>{
+    if(db.inventory[r.code])db.inventory[r.code].keluar=Math.max(0,(db.inventory[r.code].keluar||0)-r.qty);
+    setStor('bar',r.code,getStor('bar',r.code)+r.qty);
+    db.issues.splice(idx,1);
+    saveDB(db);renderIssue();refreshDashboardStats();toast('Catatan keluar dihapus','warn');
+  });
+}
+
+function deleteWaste(idx){
+  const r=db.wastes[idx];
+  askConfirm('Hapus catatan waste "'+r.name+' '+r.qty+' '+r.unit+'"? Stok akan dikembalikan.',()=>{
+    if(db.inventory[r.code])db.inventory[r.code].waste=Math.max(0,(db.inventory[r.code].waste||0)-r.qty);
+    db.wastes.splice(idx,1);
+    saveDB(db);renderWaste();refreshDashboardStats();toast('Catatan waste dihapus','warn');
+  });
+}
+
+function deleteGRN(idx){
+  const g=db.grns[idx];
+  askConfirm('Hapus GRN "'+g.no+'" dari '+g.supplier+'? Stok yang masuk akan dikurangi kembali.',()=>{
+    g.items.forEach(it=>{
+      if(db.inventory[it.code])db.inventory[it.code].masuk=Math.max(0,(db.inventory[it.code].masuk||0)-it.qty);
+      if(g.dest==='gudang'||g.dest==='both')setStor('gudang',it.code,getStor('gudang',it.code)-(g.dest==='both'?it.qty/2:it.qty));
+      if(g.dest==='bar'||g.dest==='both')setStor('bar',it.code,getStor('bar',it.code)-(g.dest==='both'?it.qty/2:it.qty));
+    });
+    db.grns.splice(idx,1);
+    saveDB(db);renderGRN();refreshDashboardStats();toast('GRN '+g.no+' dihapus','warn');
+  });
+}
+
+function deletePR(idx){
+  const p=db.prs[idx];
+  askConfirm('Hapus Purchase Request "'+p.no+'"?',()=>{
+    db.prs.splice(idx,1);saveDB(db);renderPR();
+    document.getElementById('pr-badge').textContent=db.prs.filter(x=>x.status==='Menunggu Approval').length;
+    toast('PR '+p.no+' dihapus','warn');
+  });
+}
+
+function editStorStock(loc,code){
+  const m=getMaster(code);
+  const cur=getStor(loc,code);
+  const val=prompt('Edit stok '+(loc==='gudang'?'🏗️ Gudang':'❄️ Bar')+'\n"'+m.name+'"\n\nStok sekarang: '+cur+' '+m.unit+'\nMasukkan nilai baru:',cur);
+  if(val===null)return;
+  const num=parseFloat(val);
+  if(isNaN(num)||num<0){toast('Nilai tidak valid','warn');return;}
+  setStor(loc,code,num);
+  saveDB(db);renderStorage();
+  toast('Stok '+m.name+' di '+(loc==='gudang'?'Gudang':'Bar')+' → '+num+' '+m.unit);
+}
+
+// ── RENDER FUNCTIONS ──────────────────────────────────────
+function refreshDashboardStats(){
+  const critical=db.master.filter(m=>getStockAkhir(m.code)<=(m.par||0)).length;
+  const todayStr2=new Date().toLocaleDateString('id-ID');
+  const todayIssues=db.issues.filter(i=>i.time.includes(todayStr2)).length;
+  const wasteTotal=db.wastes.reduce((s,w)=>s+(w.qty||0),0);
+  const pendingPR=db.prs.filter(p=>p.status==='Menunggu Approval').length;
+  const grnCount=db.grns.length;
+  const todayTx=(db.transfers||[]).filter(t=>t.time.includes(todayStr2)).length;
+
+  document.getElementById('s-kritis').innerHTML=critical+' <span class="stat-unit">item</span>';
+  document.getElementById('s-keluar').innerHTML=todayIssues+' <span class="stat-unit">catatan</span>';
+  document.getElementById('s-waste').innerHTML=wasteTotal.toFixed(1)+' <span class="stat-unit">unit</span>';
+  document.getElementById('s-pr').innerHTML=pendingPR+' <span class="stat-unit">PR</span>';
+  document.getElementById('s-grn').innerHTML=grnCount+' <span class="stat-unit">dok</span>';
+  document.getElementById('s-transfer').innerHTML=todayTx+' <span class="stat-unit">tx</span>';
+
+  const ac=document.getElementById('alert-container');ac.innerHTML='';
+  if(critical>0)ac.innerHTML+=`<div class="alert crit">⚠ <div><strong>${critical} item stok kritis/habis</strong> — segera buat Purchase Request</div></div>`;
+  if(pendingPR>0)ac.innerHTML+=`<div class="alert warn">🛒 <div><strong>${pendingPR} Purchase Request</strong> menunggu approval</div></div>`;
+  if(!critical&&!pendingPR)ac.innerHTML=`<div class="alert ok">✅ <div>Semua stok aman dan tidak ada PR tertunda</div></div>`;
+
+  const critItems=db.master.filter(m=>getStockAkhir(m.code)<=(m.par||0)*1.5);
+  const csl=document.getElementById('critical-stock-list');
+  csl.innerHTML=!critItems.length?'<div class="empty-state"><div class="empty-icon">✅</div><p>Semua stok aman</p></div>':
+    critItems.map(m=>{const s=getStockAkhir(m.code);const st=getStatus(m.code);const pct=Math.min(100,(s/(m.par||1))*100);
+      return `<div class="stock-item"><div style="flex:1"><div class="stock-name">${m.name}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+          <div class="progress-wrap"><div class="progress-bar ${st.cls}" style="width:${pct}%"></div></div>
+          <span style="font-size:11px;color:rgba(253,246,236,0.4)">Par: ${m.par} ${m.unit}</span>
+        </div></div>
+        <div style="text-align:right"><div class="stock-qty">${s} ${m.unit}</div>
+          <span class="badge ${st.cls}" style="margin-top:4px">${st.label}</span>
+        </div></div>`;}).join('');
+
+  const acts=(db.activities||[]).slice(0,8);
+  const al=document.getElementById('activity-log');
+  al.innerHTML=!acts.length?'<div class="empty-state"><div class="empty-icon">🕐</div><p>Belum ada aktivitas</p></div>':
+    acts.map(a=>`<div class="log-item"><div class="log-dot ${a.type}"></div>
+      <div style="flex:1"><div class="log-text">${a.icon} ${a.text}</div><div class="log-time">${a.time}</div></div></div>`).join('');
+
+  renderChart();
+}
+
+function renderChart(){
+  const chart=document.getElementById('usage-chart');
+  const days=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];const today=new Date();
+  const data=Array.from({length:7},(_,i)=>{const d=new Date(today);d.setDate(today.getDate()-6+i);
+    const ds=d.toLocaleDateString('id-ID');
+    const k=db.issues.filter(x=>x.time.includes(ds)).reduce((s,x)=>s+(x.qty||0),0);
+    const w=db.wastes.filter(x=>x.time&&x.time.includes(ds)).reduce((s,x)=>s+(x.qty||0),0);
+    return{day:days[d.getDay()],keluar:k,waste:w};});
+  const mx=Math.max(...data.map(d=>Math.max(d.keluar,d.waste)),1);
+  chart.innerHTML=data.map(d=>`<div class="bar-col">
+    <div style="display:flex;gap:2px;align-items:flex-end;height:100px">
+      <div class="bar" data-val="${d.keluar.toFixed(1)}" style="height:${Math.max(4,d.keluar/mx*100)}px;background:linear-gradient(180deg,#D4A853,#C8956C);width:18px;border-radius:4px 4px 0 0"></div>
+      <div class="bar" data-val="W:${d.waste.toFixed(1)}" style="height:${Math.max(2,d.waste/mx*100)}px;background:linear-gradient(180deg,#C62828,#ef5350);width:12px;border-radius:4px 4px 0 0"></div>
+    </div><div class="bar-label">${d.day}</div></div>`).join('');
+}
+
+function renderInventory(){
+  document.getElementById('inventory-table-body').innerHTML=db.master.map(m=>{
+    const inv=db.inventory[m.code]||{awal:0,masuk:0,keluar:0,waste:0};
+    const akhir=getStockAkhir(m.code);const st=getStatus(m.code);
+    return `<tr><td><strong>${m.name}</strong></td><td><span class="mono">${m.code}</span></td>
+      <td>${m.unit}</td><td>${inv.awal||0}</td>
+      <td style="color:#81c784">+${inv.masuk||0}</td><td style="color:#ffb74d">-${inv.keluar||0}</td>
+      <td style="color:#ef9a9a">-${inv.waste||0}</td>
+      <td><strong style="color:var(--latte)">${akhir}</strong></td>
+      <td>${m.par}</td><td><span class="badge ${st.cls}">${st.label}</span></td></tr>`;
+  }).join('');
+}
+
+function renderFifo(){
+  const div=document.getElementById('fifo-list');
+  div.innerHTML=db.master.slice(0,14).map(m=>{
+    const batches=(db.fifo[m.code]||[]).filter(b=>!b.used);const old=batches[0],nw=batches[1];
+    return `<div class="fifo-row">
+      <div class="fifo-name">${m.name}<br><span style="font-size:11px;color:rgba(253,246,236,0.3)">${m.code}</span></div>
+      <div class="fifo-batches">
+        <div class="fifo-batch old"><div class="fb-label">🟠 Batch Lama (Pakai Dulu)</div>
+          ${old?`<div class="fb-val">${old.qty} ${m.unit}</div>
+            <div style="font-size:10px;color:rgba(255,183,77,0.5);margin-top:2px">Masuk: ${old.inDate} | Exp: ${old.expDate||'—'}</div>
+            <button class="btn btn-sm" style="margin-top:6px;background:rgba(230,81,0,0.2);color:#ffb74d;border:none;font-size:10px;padding:3px 8px;border-radius:6px;cursor:pointer"
+              onclick="markFifoUsed('${m.code}',${db.fifo[m.code].indexOf(old)})">✓ Tandai Habis</button>`
+          :'<div style="color:rgba(255,183,77,0.3);font-size:11px">Tidak ada batch lama</div>'}</div>
+        <div class="fifo-arrow">→</div>
+        <div class="fifo-batch new"><div class="fb-label">🔵 Batch Baru (Tunggu giliran)</div>
+          ${nw?`<div class="fb-val">${nw.qty} ${m.unit}</div>
+            <div style="font-size:10px;color:rgba(100,181,246,0.5);margin-top:2px">Masuk: ${nw.inDate} | Exp: ${nw.expDate||'—'}</div>`
+          :'<div style="color:rgba(100,181,246,0.3);font-size:11px">Belum ada batch baru</div>'}</div>
+      </div></div>`;
+  }).join('');
+}
+
+function renderStorage(){
+  const gudangItems=db.master.filter(m=>m.loc==='gudang'||m.loc==='both');
+  const barItems=db.master.filter(m=>m.loc==='bar'||m.loc==='both');
+  const gTotal=gudangItems.length;
+  const gKritis=gudangItems.filter(m=>getStorStatus(getStor('gudang',m.code),m.par).cls==='crit').length;
+  const gNilai=gudangItems.reduce((s,m)=>s+getStor('gudang',m.code)*m.price,0);
+  document.getElementById('g-total').textContent=gTotal;
+  document.getElementById('g-kritis').textContent=gKritis;
+  document.getElementById('g-nilai').textContent=fmtRp(gNilai);
+
+  const bTotal=barItems.length;
+  const bKritis=barItems.filter(m=>getStorStatus(getStor('bar',m.code),m.par).cls==='crit').length;
+  const today2=new Date();
+  const bExp=db.master.reduce((s,m)=>{
+    const batches=(db.fifo[m.code]||[]).filter(b=>!b.used&&b.expDate);
+    return s+batches.filter(b=>(new Date(b.expDate)-today2)/(86400000)<3).length;
+  },0);
+  document.getElementById('b-total').textContent=bTotal;
+  document.getElementById('b-kritis').textContent=bKritis;
+  document.getElementById('b-exp').textContent=bExp;
+
+  document.getElementById('gudang-tbody').innerHTML=gudangItems.map(m=>{
+    const qty=getStor('gudang',m.code);const st=getStorStatus(qty,m.par);
+    return `<tr><td><strong>${m.name}</strong></td><td><span class="mono">${m.code}</span></td>
+      <td>${m.unit}</td><td><strong style="color:#ffb74d">${qty}</strong></td><td>${m.par}</td>
+      <td><span class="badge ${st.cls}">${st.label}</span></td>
+      <td style="font-size:12px;color:rgba(253,246,236,0.5)">${m.temp}</td>
+      <td><div class="act-col">
+        <button class="btn btn-edit btn-sm" onclick="editStorStock('gudang','${m.code}')" title="Edit qty">✏️</button>
+        <button class="btn btn-teal btn-sm" onclick="openTransferModal('gudang','bar','${m.code}')" title="Transfer ke Bar">↔</button>
+      </div></td></tr>`;
+  }).join('');
+
+  document.getElementById('bar-tbody').innerHTML=barItems.map(m=>{
+    const qty=getStor('bar',m.code);const st=getStorStatus(qty,m.par);
+    const batch=(db.fifo[m.code]||[]).filter(b=>!b.used)[0];
+    const bukaTgl=batch?batch.inDate:'—';
+    return `<tr><td><strong>${m.name}</strong></td><td><span class="mono">${m.code}</span></td>
+      <td>${m.unit}</td><td><strong style="color:#64b5f6">${qty}</strong></td><td>${m.par}</td>
+      <td><span class="badge ${st.cls}">${st.label}</span></td>
+      <td style="font-size:12px;color:rgba(253,246,236,0.5)">${bukaTgl}</td>
+      <td><div class="act-col">
+        <button class="btn btn-edit btn-sm" onclick="editStorStock('bar','${m.code}')" title="Edit qty">✏️</button>
+        <button class="btn btn-teal btn-sm" onclick="openTransferModal('bar','gudang','${m.code}')" title="Return ke Gudang">↩</button>
+      </div></td></tr>`;
+  }).join('');
+}
+
+function renderTransfer(){
+  const tbody=document.getElementById('transfer-tbody');
+  const tfs=db.transfers||[];
+  if(!tfs.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">↔️</div><p>Belum ada transfer barang</p></div></td></tr>';return;}
+  const lbls={gudang:'🏗️ Gudang',bar:'❄️ Bar Chiller'};
+  tbody.innerHTML=[...tfs].reverse().map((t,ri)=>{
+    const realIdx=tfs.length-1-ri;
+    return `<tr>
+      <td><span class="mono" style="font-size:11px">${t.time}</span></td>
+      <td>${t.name}</td>
+      <td style="color:var(--latte);font-weight:600">${t.qty} ${t.unit}</td>
+      <td><span class="badge warn">${lbls[t.from]||t.from}</span></td>
+      <td><span class="badge info">${lbls[t.to]||t.to}</span></td>
+      <td style="font-size:12px;color:rgba(253,246,236,0.5)">${t.reason}</td>
+      <td>${t.by}</td>
+      <td><div class="act-col">
+        <button class="btn btn-danger btn-sm" onclick="deleteTransfer(${realIdx})" title="Hapus & rollback">🗑</button>
+      </div></td></tr>`;
+  }).join('');
+}
+
+function renderPR(){
+  const tbody=document.getElementById('pr-table-body');
+  if(!db.prs.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🛒</div><p>Belum ada Purchase Request</p></div></td></tr>';return;}
+  const stMap={'Menunggu Approval':'warn','Disetujui':'ok','Draft':'info','Ditolak':'crit','Selesai Order':'gold'};
+  tbody.innerHTML=[...db.prs].reverse().map((pr,ri)=>{
+    const realIdx=db.prs.length-1-ri;
+    return `<tr>
+      <td><span class="mono">${pr.no}</span></td><td>${pr.date}</td>
+      <td>${pr.items.length} item</td><td style="color:var(--latte)">${fmtRp(pr.total)}</td>
+      <td><span class="badge ${stMap[pr.status]||'info'}">${pr.status}</span></td>
+      <td>${pr.by}</td>
+      <td><div class="act-col">
+        ${pr.status==='Menunggu Approval'?`<button class="btn btn-ghost btn-sm" onclick="approvePR('${pr.no}')">✓ Setujui</button>`:''}
+        <button class="btn btn-danger btn-sm" onclick="deletePR(${realIdx})" title="Hapus PR">🗑</button>
+      </div></td></tr>`;
+  }).join('');
+}
+
+function renderGRN(){
+  const tbody=document.getElementById('grn-table-body');
+  if(!db.grns.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📥</div><p>Belum ada penerimaan barang</p></div></td></tr>';return;}
+  const destLbl={gudang:'🏗️ Gudang',bar:'❄️ Bar',both:'Keduanya'};
+  tbody.innerHTML=[...db.grns].reverse().map((g,ri)=>{
+    const realIdx=db.grns.length-1-ri;
+    return `<tr>
+      <td><span class="mono">${g.no}</span></td><td>${g.date}</td><td>${g.supplier}</td>
+      <td>${g.totalItems} item</td><td>${g.totalQty}</td>
+      <td><span class="badge teal">${destLbl[g.dest]||'—'}</span></td>
+      <td>${g.by}</td>
+      <td><div class="act-col">
+        <button class="btn btn-danger btn-sm" onclick="deleteGRN(${realIdx})" title="Hapus & rollback stok">🗑</button>
+      </div></td></tr>`;
+  }).join('');
+}
+
+function renderIssue(){
+  const tbody=document.getElementById('issue-table-body');
+  if(!db.issues.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📤</div><p>Belum ada pengeluaran barang</p></div></td></tr>';return;}
+  tbody.innerHTML=[...db.issues].reverse().map((i,ri)=>{
+    const realIdx=db.issues.length-1-ri;
+    return `<tr>
+      <td><span class="mono" style="font-size:11px">${i.time}</span></td>
+      <td>${i.name}</td>
+      <td style="color:var(--latte);font-weight:600">${i.qty}</td><td>${i.unit}</td>
+      <td><span class="badge info">${i.cat}</span></td><td>${i.shift}</td><td>${i.by}</td>
+      <td><div class="act-col">
+        <button class="btn btn-edit btn-sm" onclick="openIssueModal(${realIdx})" title="Edit">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteIssue(${realIdx})" title="Hapus">🗑</button>
+      </div></td></tr>`;
+  }).join('');
+}
+
+function renderWaste(){
+  const tbody=document.getElementById('waste-table-body');
+  if(!db.wastes.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🗑</div><p>Belum ada catatan waste</p></div></td></tr>';return;}
+  tbody.innerHTML=[...db.wastes].reverse().map((w,ri)=>{
+    const realIdx=db.wastes.length-1-ri;
+    return `<tr>
+      <td><span class="mono" style="font-size:11px">${w.time}</span></td>
+      <td>${w.name}</td>
+      <td style="color:#ef9a9a;font-weight:600">${w.qty}</td>
+      <td><span class="badge crit">${w.cause}</span></td>
+      <td style="color:#ef9a9a">${fmtRp(w.loss)}</td>
+      <td style="font-size:12px">${w.action||'—'}</td><td>${w.by}</td>
+      <td><div class="act-col">
+        <button class="btn btn-edit btn-sm" onclick="openWasteModal(${realIdx})" title="Edit">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteWaste(${realIdx})" title="Hapus">🗑</button>
+      </div></td></tr>`;
+  }).join('');
+}
+
+function renderMaster(){
+  const locLbl={gudang:'🏗️ Gudang',bar:'❄️ Bar',both:'Keduanya'};
+  document.getElementById('master-table-body').innerHTML=db.master.map(m=>`<tr>
+    <td><span class="mono">${m.code}</span></td><td><strong>${m.name}</strong></td>
+    <td>${m.unit}</td><td><span class="badge warn">${m.par}</span></td>
+    <td style="font-size:12px">${fmtRp(m.price)}</td><td>${m.supplier}</td>
+    <td><span class="badge ${m.loc==='bar'?'info':m.loc==='both'?'teal':'gold'}">${locLbl[m.loc]||'—'}</span></td>
+    <td style="font-size:12px">${m.shelf}</td>
+    <td><div class="act-col">
+      <button class="btn btn-edit btn-sm" onclick="openMasterModal('${m.code}')" title="Edit">✏️</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteMaster('${m.code}')" title="Hapus">🗑</button>
+    </div></td></tr>`).join('');
+}
+
+function renderReport(){
+  const totalPR=db.prs.length;
+  const approvedPR=db.prs.filter(p=>p.status==='Disetujui'||p.status==='Selesai Order').length;
+  const totalWasteQty=db.wastes.reduce((s,w)=>s+(w.qty||0),0);
+  const totalWasteLoss=db.wastes.reduce((s,w)=>s+(w.loss||0),0);
+  const prApprRate=totalPR?Math.round(approvedPR/totalPR*100):0;
+  document.getElementById('report-pengadaan').innerHTML=`
+    <div class="report-metric"><span class="rm-label">Total PR Diajukan</span><span class="rm-value">${totalPR}</span></div>
+    <div class="report-metric"><span class="rm-label">PR Disetujui</span><span class="rm-value">${approvedPR}</span></div>
+    <div class="report-metric"><span class="rm-label">PR Approval Rate</span><span class="rm-value">${prApprRate}%</span></div>
+    <div class="report-metric"><span class="rm-label">Total GRN Diterima</span><span class="rm-value">${db.grns.length}</span></div>`;
+  document.getElementById('report-waste').innerHTML=`
+    <div class="report-metric"><span class="rm-label">Total Kejadian Waste</span><span class="rm-value">${db.wastes.length}</span></div>
+    <div class="report-metric"><span class="rm-label">Total Qty Waste</span><span class="rm-value">${totalWasteQty.toFixed(1)}</span></div>
+    <div class="report-metric"><span class="rm-label">Est. Total Kerugian</span><span class="rm-value" style="font-size:15px">${fmtRp(totalWasteLoss)}</span></div>`;
+  const sorted=[...db.master].sort((a,b)=>getStockAkhir(b.code)-getStockAkhir(a.code)).slice(0,6);
+  document.getElementById('report-stok').innerHTML=sorted.map(m=>`
+    <div class="report-metric"><span class="rm-label">${m.name}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--latte)">${getStockAkhir(m.code)} ${m.unit}</span></div>`).join('');
+  document.getElementById('report-kpi').innerHTML=`
+    <div class="report-metric"><span class="rm-label">Item Stok Kritis</span><span class="rm-value" style="color:#ef9a9a">${db.master.filter(m=>getStockAkhir(m.code)<=(m.par||0)).length}</span></div>
+    <div class="report-metric"><span class="rm-label">Item Stok Aman</span><span class="rm-value" style="color:#81c784">${db.master.filter(m=>getStockAkhir(m.code)>(m.par||0)*1.5).length}</span></div>
+    <div class="report-metric"><span class="rm-label">Total Catatan Keluar</span><span class="rm-value">${db.issues.length}</span></div>
+    <div class="report-metric"><span class="rm-label">Total Transfer</span><span class="rm-value">${(db.transfers||[]).length}</span></div>`;
+  const qMap={};
+  db.issues.forEach(i=>{qMap[i.name]=(qMap[i.name]||0)+(i.qty||0);});
+  const topKeluar=Object.entries(qMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  document.getElementById('report-top').innerHTML=topKeluar.length?topKeluar.map(([n,q])=>`
+    <div class="report-metric"><span class="rm-label" style="font-size:12px">${n}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--latte)">${q.toFixed(1)}</span></div>`).join('')
+    :'<div class="empty-state"><p>Belum ada data</p></div>';
+}
+
+function renderDashboard(){refreshDashboardStats();}
+
+// ── INIT ──────────────────────────────────────────────────
+function init(){
+  const now=new Date();
+  document.getElementById('today-date').textContent=now.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('last-update').textContent=now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('pr-badge').textContent=db.prs.filter(p=>p.status==='Menunggu Approval').length||0;
+  renderDashboard();
+}
+document.querySelectorAll('.modal-overlay').forEach(ov=>{ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.remove('open');});});
+init();
+</script>
+</body>
+</html>
